@@ -29,7 +29,7 @@ It was sourced from the UCI Machine Learning Repository and can be found [here](
 
 ## Report
 
-The final report can be found [here](https://ttimbers.github.io/breast-cancer-predictor/notebooks/breast_cancer_predictor_report.html).
+The final report can be found [here](notebooks/adult_income_predictor_report.pdf).
 
 ## Usage
 
