@@ -1,6 +1,6 @@
 # Adult Income Predictor
 
--   Author: Michael Suriawan, Francisco Ramirez, Tingting Chen, Quanhua Huang
+- Author: Michael Suriawan, Francisco Ramirez, Tingting Chen, Quanhua Huang
 
 Adult Income Predictor project, a data analysis project for DSCI 522 (Data Science workflows) course in the Master of Data Science program at the University of British Columbia.
 
@@ -14,14 +14,14 @@ The Adult dataset, originally curated from the 1994 U.S. Census Bureau database,
 
 The Key features used in this project are:
 
--   Age
--   Education Level
--   Marital Status
--   Occupation
--   Race
--   Sex
--   Relationship
--   Hours Worked per Week
+- Age
+- Education Level
+- Marital Status
+- Occupation
+- Race
+- Sex
+- Relationship
+- Hours Worked per Week
 
 The target variable is whether an individual's income exceeds \$50,000 per year.
 
@@ -51,12 +51,11 @@ Next, under the "Kernel" menu click "Restart Kernel and Run All Cells...".
 
 ## Dependencies
 
--   `conda` (version 23.9.0 or higher)
--   `mamba` (version 1.5.8 or higher)
--   `conda-lock` (version 2.5.7 or higher)
--   `jupyterlab` (version 4.0.0 or higher)
--   `nb_conda_kernels` (version 2.3.1 or higher)
--   Python and packages listed in [`environment.yml`](environment.yml)
+- `conda` (version 23.9.0 or higher)
+- `conda-lock` (version 2.5.7 or higher)
+- `jupyterlab` (version 4.0.0 or higher)
+- `nb_conda_kernels` (version 2.3.1 or higher)
+- Python and packages listed in [`environment.yml`](environment.yml)
 
 ## License
 
@@ -64,7 +63,7 @@ The Adult Income Predictor report contained herein are licensed under the [Attri
 
 ## References
 
--   Becker, B. & Kohavi, R. (1996). *Adult Dataset*. UCI Machine Learning Repository. <https://doi.org/10.24432/C5XW20>.
--   Kolhatkar, V. *UBC Master of Data Science program, 2024-25, DSCI 571 Supervised Learning I*.
--   Ostblom, J. *UBC Master of Data Science program, 2024-25, DSCI 573 Feature and Model Selection*.
--   Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al. (2011). Scikit-learn: Machine Learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
+- Becker, B. & Kohavi, R. (1996). *Adult Dataset*. UCI Machine Learning Repository. <https://doi.org/10.24432/C5XW20>.
+- Kolhatkar, V. *UBC Master of Data Science program, 2024-25, DSCI 571 Supervised Learning I*.
+- Ostblom, J. *UBC Master of Data Science program, 2024-25, DSCI 573 Feature and Model Selection*.
+- Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al. (2011). Scikit-learn: Machine Learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
