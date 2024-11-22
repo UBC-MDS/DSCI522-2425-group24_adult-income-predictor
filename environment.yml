@@ -1,0 +1,17 @@
+name: 522-group-24
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.11,<3.13
+  - pip
+  - ipykernel
+  - nb_conda_kernels
+  - pandas
+  - mamba
+  - altair-all=5.4.*
+  - vegafusion==1.6.9
+  - vega_datasets
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - conda-lock
