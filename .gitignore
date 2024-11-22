@@ -1,1 +1,5 @@
+# Don't commit checkpoint files
 .ipynb_checkpoints/
+
+# Don't commit data folders
+.data/

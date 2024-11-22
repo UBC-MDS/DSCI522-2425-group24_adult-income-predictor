@@ -1,0 +1,9 @@
+name: 522-group-24
+channels:
+  - conda-forge
+dependencies:
+  - conda-lock
+  - pandas
+  - mamba
+  - altair
+  - scikit-learn
