@@ -2,16 +2,18 @@ name: 522-group-24
 channels:
   - conda-forge
 dependencies:
-  - python>=3.11,<3.13
-  - pip
-  - ipykernel
-  - nb_conda_kernels
-  - pandas
-  - mamba
-  - altair-all=5.4.*
-  - vegafusion==1.6.9
-  - vega_datasets
-  - scipy
-  - scikit-learn
-  - matplotlib
-  - conda-lock
+  - altair-all=5.4.0
+  - ipykernel=6.29.5
+  - matplotlib=3.9.2
+  - nb_conda_kernels=2.5.1
+  - pandera=0.20.2
+  - pandas=2.2.2
+  - python=3.11
+  - scikit-learn=1.5.2
+  - scipy=1.14.1
+  - vega_datasets=0.9.0
+  - vegafusion=1.6.9
+  - pip=24.3.1
+  - pip:
+    - deepchecks==0.18.1
+     
