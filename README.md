@@ -58,6 +58,9 @@ docker compose up
 3. You will now see the virtual jupyter notebook. To run the analysis,
 navigate to `notebooks/adult_income_predictor_report.ipynb` in Jupyter Lab and under the "Kernel" menu click "Restart Kernel and Run All Cells...".
 
+See GIF below for more details:
+![gif](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/img/instruction.gif)
+
 ### Clean up
 
 1. To shut down the container and clean up the resources,
