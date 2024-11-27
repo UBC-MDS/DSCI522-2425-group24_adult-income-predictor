@@ -4,7 +4,7 @@ services:
     ports:
       - "8888:8888" 
     volumes:
-      - "${PWD}:/app/data"
+      - "${PWD}:/app"
     working_dir: /app
     deploy:
       resources:

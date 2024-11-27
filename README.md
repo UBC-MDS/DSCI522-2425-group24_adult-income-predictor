@@ -31,28 +31,42 @@ It was sourced from the UCI Machine Learning Repository and can be found [here](
 
 The final report can be found [here](notebooks/adult_income_predictor_report.pdf).
 
-## Usage
-
-First time running the project, run the following from the root of this repository:
-
-``` bash
-conda-lock install --name adult-income-predictor conda-lock.yml
-```
-
-To run the analysis, run the following from the root of this repository:
-
-``` bash
-jupyter lab 
-```
-
-Open `notebooks/adult_income_predictor_report.ipynb` in Jupyter Lab and under Switch/Select Kernel choose "Python \[conda env:adult-income-predictor\]".
-
-Next, under the "Kernel" menu click "Restart Kernel and Run All Cells...".
-
 ## Dependencies
 
+- [Docker](https://www.docker.com/)
+
+## Usage
+
+### Setup
+
+> If you are using Windows or Mac, make sure Docker Desktop is running.
+
+1. Clone this GitHub repository using `git clone`
+
+### Running the analysis
+
+1. Navigate to the root of this project on your computer using the
+   command line and enter the following command:
+
+```bash
+docker compose up
+```
+
+2. In the terminal, look for a URL that starts with
+`http://127.0.0.1:8888/lab?token=` and copy and paste that URL into your browser.
+
+3. You will now see the virtual jupyter notebook. To run the analysis,
+navigate to `notebooks/adult_income_predictor_report.ipynb` in Jupyter Lab and under the "Kernel" menu click "Restart Kernel and Run All Cells...".
+
+### Clean up
+
+1. To shut down the container and clean up the resources,
+type `Cntrl` + `C` in the terminal
+where you launched the container, and then type `docker compose rm`
+
+## Developer Dependencies
+
 - `conda` (version 23.9.0 or higher)
-- `conda-lock` (version 2.5.7 or higher)
 - `jupyterlab` (version 4.0.0 or higher)
 - `nb_conda_kernels` (version 2.3.1 or higher)
 - Python and packages listed in [`environment.yml`](environment.yml)
