@@ -59,7 +59,7 @@ docker compose up
 navigate to `notebooks/adult_income_predictor_report.ipynb` in Jupyter Lab and under the "Kernel" menu click "Restart Kernel and Run All Cells...".
 
 See GIF below for more details:
-![gif](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/img/instruction.gif)
+![gif](https://raw.githubusercontent.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/refs/heads/main/img/instruction.gif)
 
 ### Clean up
 
