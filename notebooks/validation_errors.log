@@ -1,0 +1,13 @@
+2024-11-28 23:34:47,934 - 
+{
+  "DATA": {
+    "DATAFRAME_CHECK": [
+      {
+        "schema": null,
+        "column": null,
+        "check": "Duplicate rows found.",
+        "error": "DataFrameSchema 'None' failed series or dataframe validator 0: <Check <lambda>: Duplicate rows found.>"
+      }
+    ]
+  }
+}
