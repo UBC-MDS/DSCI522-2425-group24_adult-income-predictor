@@ -7583,7 +7583,10 @@ a.anchor-link {
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pandera</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
 <span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
@@ -7592,6 +7595,10 @@ a.anchor-link {
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">ConfusionMatrixDisplay</span> 
+<span class="kn">from</span> <span class="nn">deepchecks.tabular</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">deepchecks.tabular.checks</span> <span class="kn">import</span> <span class="n">FeatureLabelCorrelation</span>
+<span class="kn">from</span> <span class="nn">deepchecks.tabular.checks.data_integrity</span> <span class="kn">import</span> <span class="n">FeatureFeatureCorrelation</span>
+<span class="kn">from</span> <span class="nn">deepchecks.tabular.checks</span> <span class="kn">import</span> <span class="n">ClassImbalance</span>
 <span class="n">alt</span><span class="o">.</span><span class="n">data_transformers</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="s1">'vegafusion'</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -7617,12 +7624,11 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Data-Load">Data Load<a class="anchor-link" href="#Data-Load">¶</a></h1><p>The following cell loads and displays the original data set.</p>
-<p>It also adds names to the columns aligned to the description from the data set location in the UC Irvine Machine Learning Repository.</p>
+<h1 id="Download-and-Extract-Dataset">Download and Extract Dataset<a class="anchor-link" href="#Download-and-Extract-Dataset">¶</a></h1>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=42fb10b8-9eda-4680-b01e-733ee23e23e1">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=42fb10b8-9eda-4680-b01e-733ee23e23e1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7641,8 +7647,76 @@ a.anchor-link {
 
 <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="s2">"../data/raw/adult.zip"</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
     <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">"../data/raw"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=495350ac-87bc-4cad-9ee5-9f9b2c60af61">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Data-Validation-1:-Raw-Data-File-Format">Data Validation 1: Raw Data File Format<a class="anchor-link" href="#Data-Validation-1:-Raw-Data-File-Format">¶</a></h1>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0642ca77-4b8c-460d-8e7d-cdbab3b0377b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">file_path</span> <span class="o">=</span> <span class="s2">"../data/raw/adult.data"</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unable to find raw file in </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">. Please see the download step to investigate."</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'.data'</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2"> is not a DATA file. Please see the download step to investigate."</span><span class="p">)</span>
 
-<span class="n">data_adult</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"../data/raw/adult.data"</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'age'</span><span class="p">,</span> <span class="s1">'workclass'</span><span class="p">,</span> <span class="s1">'fnlwgt'</span><span class="p">,</span> <span class="s1">'education'</span><span class="p">,</span> <span class="s1">'education-num'</span><span class="p">,</span> <span class="s1">'marital-status'</span><span class="p">,</span> <span class="s1">'occupation'</span><span class="p">,</span> <span class="s1">'relationship'</span><span class="p">,</span> <span class="s1">'race'</span><span class="p">,</span> <span class="s1">'sex'</span><span class="p">,</span> <span class="s1">'capital-gain'</span><span class="p">,</span> <span class="s1">'capital-loss'</span><span class="p">,</span> <span class="s1">'hours-per-week'</span><span class="p">,</span> <span class="s1">'native-country'</span><span class="p">,</span> <span class="s1">'income'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Data Validation 1 passed: Data File Format has been checked and verified!"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Data Validation 1 passed: Data File Format has been checked and verified!
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=860c7845-9fde-466a-99b5-19e405574bc6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Load-and-Preview-the-Dataset">Load and Preview the Dataset<a class="anchor-link" href="#Load-and-Preview-the-Dataset">¶</a></h1><p>The following cell loads and displays the original data set.</p>
+<p>It also adds names to the columns aligned to the description from the data set location in the UC Irvine Machine Learning Repository.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d004b544-3986-42e0-b1e9-8daeac7dd1d7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">data_adult</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"../data/raw/adult.data"</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'age'</span><span class="p">,</span> <span class="s1">'workclass'</span><span class="p">,</span> <span class="s1">'fnlwgt'</span><span class="p">,</span> <span class="s1">'education'</span><span class="p">,</span> <span class="s1">'education-num'</span><span class="p">,</span> <span class="s1">'marital-status'</span><span class="p">,</span> <span class="s1">'occupation'</span><span class="p">,</span> <span class="s1">'relationship'</span><span class="p">,</span> <span class="s1">'race'</span><span class="p">,</span> <span class="s1">'sex'</span><span class="p">,</span> <span class="s1">'capital-gain'</span><span class="p">,</span> <span class="s1">'capital-loss'</span><span class="p">,</span> <span class="s1">'hours-per-week'</span><span class="p">,</span> <span class="s1">'native-country'</span><span class="p">,</span> <span class="s1">'income'</span><span class="p">])</span>
 <span class="n">data_adult</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -7654,7 +7728,7 @@ a.anchor-link {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7790,6 +7864,476 @@ a.anchor-link {
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e3aa3f46-40ab-4ad2-803c-132689531b40">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Data-Validation-2:-DataFrame-Checks">Data Validation 2: DataFrame Checks<a class="anchor-link" href="#Data-Validation-2:-DataFrame-Checks">¶</a></h1><p>To ensure that the analysis is not influenced by erroneous data, the following cells aim to validate the quality of the loaded data before we perform such analyses.</p>
+<p>In this section, the loaded data will be validated for the following characteristics:</p>
+<ul>
+<li>Correct column names</li>
+<li>No empty observations</li>
+<li>Missingness not beyond expected threshold</li>
+<li>Correct data types in each column</li>
+<li>No duplicate observations</li>
+<li>No outlier or anomalous values</li>
+<li>Correct category levels (i.e., no string mismatches or single values)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c9acb0ca-951b-44be-8d1f-0a18f743c662">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Note that a log file called "validation_errors.log" will be created in this notebook location documenting the errors found by the validation process.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ea640df0-73da-4e3c-aeeb-380eee4b30c2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Configure logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">filename</span><span class="o">=</span><span class="s2">"validation_errors.log"</span><span class="p">,</span>
+    <span class="n">filemode</span><span class="o">=</span><span class="s2">"w"</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">"</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5212c09d-a03b-435f-83a3-1928259ac793">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Validation checks below:</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4146266b-a70f-4cd5-9921-772cb4a18456">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Define the schema</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">DataFrameSchema</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"age"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"age"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'age' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"workclass"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Private"</span><span class="p">,</span> <span class="s2">"Self-emp-not-inc"</span><span class="p">,</span> <span class="s2">"Self-emp-inc"</span><span class="p">,</span> <span class="s2">"Federal-gov"</span><span class="p">,</span> <span class="s2">"Local-gov"</span><span class="p">,</span> <span class="s2">"State-gov"</span><span class="p">,</span> <span class="s2">"Without-pay"</span><span class="p">,</span> <span class="s2">"Never-worked"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'workclass'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"workclass"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'workclass' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"fnlwgt"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"fnlwgt"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'fnlwgt' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"education"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Bachelors"</span><span class="p">,</span> <span class="s2">"Some-college"</span><span class="p">,</span> <span class="s2">"11th"</span><span class="p">,</span> <span class="s2">"HS-grad"</span><span class="p">,</span> <span class="s2">"Prof-school"</span><span class="p">,</span> <span class="s2">"Assoc-acdm"</span><span class="p">,</span> <span class="s2">"Assoc-voc"</span><span class="p">,</span> <span class="s2">"9th"</span><span class="p">,</span> <span class="s2">"7th-8th"</span><span class="p">,</span> <span class="s2">"12th"</span><span class="p">,</span> <span class="s2">"Masters"</span><span class="p">,</span> <span class="s2">"1st-4th"</span><span class="p">,</span> <span class="s2">"10th"</span><span class="p">,</span> <span class="s2">"Doctorate"</span><span class="p">,</span> <span class="s2">"5th-6th"</span><span class="p">,</span> <span class="s2">"Preschool"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'education'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"education"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'education' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"education-num"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"education-num"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'education-num' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"marital-status"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Married-civ-spouse"</span><span class="p">,</span> <span class="s2">"Divorced"</span><span class="p">,</span> <span class="s2">"Never-married"</span><span class="p">,</span> <span class="s2">"Separated"</span><span class="p">,</span> <span class="s2">"Widowed"</span><span class="p">,</span> <span class="s2">"Married-spouse-absent"</span><span class="p">,</span> <span class="s2">"Married-AF-spouse"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'marital-status'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"marital-status"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'marital-status' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"occupation"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Tech-support"</span><span class="p">,</span> <span class="s2">"Craft-repair"</span><span class="p">,</span> <span class="s2">"Other-service"</span><span class="p">,</span> <span class="s2">"Sales"</span><span class="p">,</span> <span class="s2">"Exec-managerial"</span><span class="p">,</span> <span class="s2">"Prof-specialty"</span><span class="p">,</span> <span class="s2">"Handlers-cleaners"</span><span class="p">,</span> <span class="s2">"Machine-op-inspct"</span><span class="p">,</span> <span class="s2">"Adm-clerical"</span><span class="p">,</span> <span class="s2">"Farming-fishing"</span><span class="p">,</span> <span class="s2">"Transport-moving"</span><span class="p">,</span> <span class="s2">"Priv-house-serv"</span><span class="p">,</span> <span class="s2">"Protective-serv"</span><span class="p">,</span> <span class="s2">"Armed-Forces"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'occupation'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"occupation"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'occupation' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"relationship"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Wife"</span><span class="p">,</span> <span class="s2">"Own-child"</span><span class="p">,</span> <span class="s2">"Husband"</span><span class="p">,</span> <span class="s2">"Not-in-family"</span><span class="p">,</span> <span class="s2">"Other-relative"</span><span class="p">,</span> <span class="s2">"Unmarried"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'relationship'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"relationship"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'relationship' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"race"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"White"</span><span class="p">,</span> <span class="s2">"Asian-Pac-Islander"</span><span class="p">,</span> <span class="s2">"Amer-Indian-Eskimo"</span><span class="p">,</span> <span class="s2">"Other"</span><span class="p">,</span> <span class="s2">"Black"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'race'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"race"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'race' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"sex"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">'Female'</span><span class="p">,</span> <span class="s1">'Male'</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'sex'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"sex"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'sex' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"capital-gain"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"capital-gain"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'capital-gain' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"capital-loss"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"capital-loss"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'capital-loss' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"hours-per-week"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"hours-per-week"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'hours-per-week' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"native-country"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"United-States"</span><span class="p">,</span> <span class="s2">"Cambodia"</span><span class="p">,</span> <span class="s2">"England"</span><span class="p">,</span> <span class="s2">"Puerto-Rico"</span><span class="p">,</span> <span class="s2">"Canada"</span><span class="p">,</span> <span class="s2">"Germany"</span><span class="p">,</span> <span class="s2">"Outlying-US(Guam-USVI-etc)"</span><span class="p">,</span> <span class="s2">"India"</span><span class="p">,</span> <span class="s2">"Japan"</span><span class="p">,</span> <span class="s2">"Greece"</span><span class="p">,</span> <span class="s2">"South"</span><span class="p">,</span> <span class="s2">"China"</span><span class="p">,</span> <span class="s2">"Cuba"</span><span class="p">,</span> <span class="s2">"Iran"</span><span class="p">,</span> <span class="s2">"Honduras"</span><span class="p">,</span> <span class="s2">"Philippines"</span><span class="p">,</span> <span class="s2">"Italy"</span><span class="p">,</span> <span class="s2">"Poland"</span><span class="p">,</span> <span class="s2">"Jamaica"</span><span class="p">,</span> <span class="s2">"Vietnam"</span><span class="p">,</span> <span class="s2">"Mexico"</span><span class="p">,</span> <span class="s2">"Portugal"</span><span class="p">,</span> <span class="s2">"Ireland"</span><span class="p">,</span> <span class="s2">"France"</span><span class="p">,</span> <span class="s2">"Dominican-Republic"</span><span class="p">,</span> <span class="s2">"Laos"</span><span class="p">,</span> <span class="s2">"Ecuador"</span><span class="p">,</span> <span class="s2">"Taiwan"</span><span class="p">,</span> <span class="s2">"Haiti"</span><span class="p">,</span> <span class="s2">"Columbia"</span><span class="p">,</span> <span class="s2">"Hungary"</span><span class="p">,</span> <span class="s2">"Guatemala"</span><span class="p">,</span> <span class="s2">"Nicaragua"</span><span class="p">,</span> <span class="s2">"Scotland"</span><span class="p">,</span> <span class="s2">"Thailand"</span><span class="p">,</span> <span class="s2">"Yugoslavia"</span><span class="p">,</span> <span class="s2">"El-Salvador"</span><span class="p">,</span> <span class="s2">"Trinadad&amp;Tobago"</span><span class="p">,</span> <span class="s2">"Peru"</span><span class="p">,</span> <span class="s2">"Hong"</span><span class="p">,</span> <span class="s2">"Holand-Netherlands"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'native-country'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"native-country"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'native-country' column."</span><span class="p">)),</span>
+        
+        <span class="s2">"income"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"&gt;50K"</span><span class="p">,</span> <span class="s2">"&lt;=50K"</span><span class="p">]),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Invalid value for 'income'."</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s2">"income"</span><span class="p">:</span> <span class="n">pa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Too many null values in 'income' column."</span><span class="p">))</span>
+    <span class="p">},</span>
+    <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Duplicate rows found."</span><span class="p">),</span>
+        <span class="n">pa</span><span class="o">.</span><span class="n">Check</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="o">~</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">any</span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s2">"Empty rows found."</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">drop_invalid_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e4d859ac-4167-4e25-a5a3-b020e9b8ea03">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The following cell, will have all the errors found in the validation process removed from the dataframe for following steps in the analysis, as well as populating the "validation_errors.log" file.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4327b42a-8791-4d66-a9e6-d835575b1b79">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Initialize error cases DataFrame</span>
+<span class="n">error_cases</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data_adult</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Validate data and handle errors</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">validated_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaErrors</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">error_cases</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">failure_cases</span>
+
+    <span class="c1"># Convert the error message to a JSON string</span>
+    <span class="n">error_message</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">error_message</span><span class="p">)</span>
+
+<span class="c1"># Filter out invalid rows based on the error cases</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">error_cases</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+    <span class="n">invalid_indices</span> <span class="o">=</span> <span class="n">error_cases</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">validated_data</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">invalid_indices</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">validated_data</span> <span class="o">=</span> <span class="n">data</span>
+
+<span class="n">data_adult</span> <span class="o">=</span> <span class="n">validated_data</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Data Validation 2 passed: Data Validation performed on Dataframe!"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Data Validation 2 passed: Data Validation performed on Dataframe!
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c17d6020-564c-422b-a28e-338d4b640cfe">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>This is the resulting data set following validation. As it can be seen, a few rows were removed from the original data set given that they did not comply with the validation rules defined.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=642b5694-1dfc-422b-8bcc-67f64cf24edb">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">data_adult</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>age</th>
+<th>workclass</th>
+<th>fnlwgt</th>
+<th>education</th>
+<th>education-num</th>
+<th>marital-status</th>
+<th>occupation</th>
+<th>relationship</th>
+<th>race</th>
+<th>sex</th>
+<th>capital-gain</th>
+<th>capital-loss</th>
+<th>hours-per-week</th>
+<th>native-country</th>
+<th>income</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>39</td>
+<td>State-gov</td>
+<td>77516</td>
+<td>Bachelors</td>
+<td>13</td>
+<td>Never-married</td>
+<td>Adm-clerical</td>
+<td>Not-in-family</td>
+<td>White</td>
+<td>Male</td>
+<td>2174</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>1</th>
+<td>50</td>
+<td>Self-emp-not-inc</td>
+<td>83311</td>
+<td>Bachelors</td>
+<td>13</td>
+<td>Married-civ-spouse</td>
+<td>Exec-managerial</td>
+<td>Husband</td>
+<td>White</td>
+<td>Male</td>
+<td>0</td>
+<td>0</td>
+<td>13</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>2</th>
+<td>38</td>
+<td>Private</td>
+<td>215646</td>
+<td>HS-grad</td>
+<td>9</td>
+<td>Divorced</td>
+<td>Handlers-cleaners</td>
+<td>Not-in-family</td>
+<td>White</td>
+<td>Male</td>
+<td>0</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>3</th>
+<td>53</td>
+<td>Private</td>
+<td>234721</td>
+<td>11th</td>
+<td>7</td>
+<td>Married-civ-spouse</td>
+<td>Handlers-cleaners</td>
+<td>Husband</td>
+<td>Black</td>
+<td>Male</td>
+<td>0</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>4</th>
+<td>28</td>
+<td>Private</td>
+<td>338409</td>
+<td>Bachelors</td>
+<td>13</td>
+<td>Married-civ-spouse</td>
+<td>Prof-specialty</td>
+<td>Wife</td>
+<td>Black</td>
+<td>Female</td>
+<td>0</td>
+<td>0</td>
+<td>40</td>
+<td>Cuba</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>32556</th>
+<td>27</td>
+<td>Private</td>
+<td>257302</td>
+<td>Assoc-acdm</td>
+<td>12</td>
+<td>Married-civ-spouse</td>
+<td>Tech-support</td>
+<td>Wife</td>
+<td>White</td>
+<td>Female</td>
+<td>0</td>
+<td>0</td>
+<td>38</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>32557</th>
+<td>40</td>
+<td>Private</td>
+<td>154374</td>
+<td>HS-grad</td>
+<td>9</td>
+<td>Married-civ-spouse</td>
+<td>Machine-op-inspct</td>
+<td>Husband</td>
+<td>White</td>
+<td>Male</td>
+<td>0</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&gt;50K</td>
+</tr>
+<tr>
+<th>32558</th>
+<td>58</td>
+<td>Private</td>
+<td>151910</td>
+<td>HS-grad</td>
+<td>9</td>
+<td>Widowed</td>
+<td>Adm-clerical</td>
+<td>Unmarried</td>
+<td>White</td>
+<td>Female</td>
+<td>0</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>32559</th>
+<td>22</td>
+<td>Private</td>
+<td>201490</td>
+<td>HS-grad</td>
+<td>9</td>
+<td>Never-married</td>
+<td>Adm-clerical</td>
+<td>Own-child</td>
+<td>White</td>
+<td>Male</td>
+<td>0</td>
+<td>0</td>
+<td>20</td>
+<td>United-States</td>
+<td>&lt;=50K</td>
+</tr>
+<tr>
+<th>32560</th>
+<td>52</td>
+<td>Self-emp-inc</td>
+<td>287927</td>
+<td>HS-grad</td>
+<td>9</td>
+<td>Married-civ-spouse</td>
+<td>Exec-managerial</td>
+<td>Wife</td>
+<td>White</td>
+<td>Female</td>
+<td>15024</td>
+<td>0</td>
+<td>40</td>
+<td>United-States</td>
+<td>&gt;50K</td>
+</tr>
+</tbody>
+</table>
+<p>32537 rows × 15 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=21e2bcef-c40c-451c-b6cc-31e35a1ca376">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7805,7 +8349,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">data_adult</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
@@ -7822,27 +8366,27 @@ a.anchor-link {
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
-RangeIndex: 32561 entries, 0 to 32560
+Index: 32537 entries, 0 to 32560
 Data columns (total 15 columns):
  #   Column          Non-Null Count  Dtype 
 ---  ------          --------------  ----- 
- 0   age             32561 non-null  int64 
- 1   workclass       32561 non-null  object
- 2   fnlwgt          32561 non-null  int64 
- 3   education       32561 non-null  object
- 4   education-num   32561 non-null  int64 
- 5   marital-status  32561 non-null  object
- 6   occupation      32561 non-null  object
- 7   relationship    32561 non-null  object
- 8   race            32561 non-null  object
- 9   sex             32561 non-null  object
- 10  capital-gain    32561 non-null  int64 
- 11  capital-loss    32561 non-null  int64 
- 12  hours-per-week  32561 non-null  int64 
- 13  native-country  32561 non-null  object
- 14  income          32561 non-null  object
+ 0   age             32537 non-null  int64 
+ 1   workclass       32537 non-null  object
+ 2   fnlwgt          32537 non-null  int64 
+ 3   education       32537 non-null  object
+ 4   education-num   32537 non-null  int64 
+ 5   marital-status  32537 non-null  object
+ 6   occupation      32537 non-null  object
+ 7   relationship    32537 non-null  object
+ 8   race            32537 non-null  object
+ 9   sex             32537 non-null  object
+ 10  capital-gain    32537 non-null  int64 
+ 11  capital-loss    32537 non-null  int64 
+ 12  hours-per-week  32537 non-null  int64 
+ 13  native-country  32537 non-null  object
+ 14  income          32537 non-null  object
 dtypes: int64(6), object(9)
-memory usage: 3.7+ MB
+memory usage: 4.0+ MB
 </pre>
 </div>
 </div>
@@ -7853,7 +8397,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">data_adult</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
@@ -7867,7 +8411,7 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7898,30 +8442,30 @@ memory usage: 3.7+ MB
 <tbody>
 <tr>
 <th>count</th>
-<td>32561.000000</td>
-<td>3.256100e+04</td>
-<td>32561.000000</td>
-<td>32561.000000</td>
-<td>32561.000000</td>
-<td>32561.000000</td>
+<td>32537.000000</td>
+<td>3.253700e+04</td>
+<td>32537.000000</td>
+<td>32537.000000</td>
+<td>32537.000000</td>
+<td>32537.000000</td>
 </tr>
 <tr>
 <th>mean</th>
-<td>38.581647</td>
-<td>1.897784e+05</td>
-<td>10.080679</td>
-<td>1077.648844</td>
-<td>87.303830</td>
-<td>40.437456</td>
+<td>38.585549</td>
+<td>1.897808e+05</td>
+<td>10.081815</td>
+<td>1078.443741</td>
+<td>87.368227</td>
+<td>40.440329</td>
 </tr>
 <tr>
 <th>std</th>
-<td>13.640433</td>
-<td>1.055500e+05</td>
-<td>2.572720</td>
-<td>7385.292085</td>
-<td>402.960219</td>
-<td>12.347429</td>
+<td>13.637984</td>
+<td>1.055565e+05</td>
+<td>2.571633</td>
+<td>7387.957424</td>
+<td>403.101833</td>
+<td>12.346889</td>
 </tr>
 <tr>
 <th>min</th>
@@ -7953,7 +8497,7 @@ memory usage: 3.7+ MB
 <tr>
 <th>75%</th>
 <td>48.000000</td>
-<td>2.370510e+05</td>
+<td>2.369930e+05</td>
 <td>12.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -7991,7 +8535,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different marital status"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8012,26 +8556,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb.vega-embed {
+  #altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb.vega-embed details,
-  #altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb.vega-embed details summary {
+  #altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86.vega-embed details,
+  #altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb"></div>
+<div id="altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb") {
-      outputDiv = document.getElementById("altair-viz-64c0f3fa0dcb493fb348fe28a76cfbeb");
+    if (outputDiv.id !== "altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86") {
+      outputDiv = document.getElementById("altair-viz-ec5b2bf36fdd4a3baa1cdbb763ddfa86");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8077,7 +8621,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 10192, "income": " <=50K", "marital-status": " Never-married"}, {"__count": 8284, "income": " <=50K", "marital-status": " Married-civ-spouse"}, {"__count": 3980, "income": " <=50K", "marital-status": " Divorced"}, {"__count": 384, "income": " <=50K", "marital-status": " Married-spouse-absent"}, {"__count": 6692, "income": " >50K", "marital-status": " Married-civ-spouse"}, {"__count": 491, "income": " >50K", "marital-status": " Never-married"}, {"__count": 463, "income": " >50K", "marital-status": " Divorced"}, {"__count": 959, "income": " <=50K", "marital-status": " Separated"}, {"__count": 13, "income": " <=50K", "marital-status": " Married-AF-spouse"}, {"__count": 908, "income": " <=50K", "marital-status": " Widowed"}, {"__count": 66, "income": " >50K", "marital-status": " Separated"}, {"__count": 85, "income": " >50K", "marital-status": " Widowed"}, {"__count": 34, "income": " >50K", "marital-status": " Married-spouse-absent"}, {"__count": 10, "income": " >50K", "marital-status": " Married-AF-spouse"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 10, "max": 10192}]}, {"name": "source_0_y_domain_marital-status", "values": [{"marital-status": " Never-married"}, {"marital-status": " Married-civ-spouse"}, {"marital-status": " Divorced"}, {"marital-status": " Married-spouse-absent"}, {"marital-status": " Separated"}, {"marital-status": " Married-AF-spouse"}, {"marital-status": " Widowed"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"x2": {"value": 0, "scale": "x"}, "opacity": {"value": 0.75}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "fill": {"field": "income", "scale": "color"}, "x": {"field": "__count", "scale": "x"}, "y": {"field": "marital-status", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "zero": true, "nice": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_marital-status", "field": "marital-status", "sort": true}, "range": [0, {"signal": "height"}], "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "tickCount": {"signal": "ceil(width/40)"}, "grid": true, "gridScale": "y", "orient": "bottom", "aria": false, "domain": false, "labels": false, "maxExtent": 0, "minExtent": 0, "zindex": 0, "ticks": false}, {"scale": "x", "grid": false, "labelOverlap": true, "orient": "bottom", "labelFlush": true, "tickCount": {"signal": "ceil(width/40)"}, "title": "Count of Records", "zindex": 0}, {"scale": "y", "grid": false, "orient": "left", "zindex": 0, "title": "Marital Status"}], "title": {"text": "Income for different marital status", "frame": "group"}, "width": 300, "background": "white", "height": 200, "padding": 5, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}]}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 10176, "income": " <=50K", "marital-status": " Never-married"}, {"__count": 8280, "income": " <=50K", "marital-status": " Married-civ-spouse"}, {"__count": 3978, "income": " <=50K", "marital-status": " Divorced"}, {"__count": 384, "income": " <=50K", "marital-status": " Married-spouse-absent"}, {"__count": 6690, "income": " >50K", "marital-status": " Married-civ-spouse"}, {"__count": 491, "income": " >50K", "marital-status": " Never-married"}, {"__count": 463, "income": " >50K", "marital-status": " Divorced"}, {"__count": 959, "income": " <=50K", "marital-status": " Separated"}, {"__count": 13, "income": " <=50K", "marital-status": " Married-AF-spouse"}, {"__count": 908, "income": " <=50K", "marital-status": " Widowed"}, {"__count": 66, "income": " >50K", "marital-status": " Separated"}, {"__count": 85, "income": " >50K", "marital-status": " Widowed"}, {"__count": 34, "income": " >50K", "marital-status": " Married-spouse-absent"}, {"__count": 10, "income": " >50K", "marital-status": " Married-AF-spouse"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 10, "max": 10176}]}, {"name": "source_0_y_domain_marital-status", "values": [{"marital-status": " Never-married"}, {"marital-status": " Married-civ-spouse"}, {"marital-status": " Divorced"}, {"marital-status": " Married-spouse-absent"}, {"marital-status": " Separated"}, {"marital-status": " Married-AF-spouse"}, {"marital-status": " Widowed"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"height": {"signal": "max(0.25, bandwidth('y'))"}, "opacity": {"value": 0.75}, "x": {"field": "__count", "scale": "x"}, "y": {"field": "marital-status", "scale": "y"}, "fill": {"field": "income", "scale": "color"}, "x2": {"value": 0, "scale": "x"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "zero": true, "nice": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_marital-status", "field": "marital-status", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "tickCount": {"signal": "ceil(width/40)"}, "grid": true, "zindex": 0, "gridScale": "y", "aria": false, "ticks": false, "orient": "bottom", "domain": false, "labels": false, "maxExtent": 0, "minExtent": 0}, {"scale": "x", "title": "Count of Records", "zindex": 0, "labelOverlap": true, "tickCount": {"signal": "ceil(width/40)"}, "orient": "bottom", "grid": false, "labelFlush": true}, {"scale": "y", "zindex": 0, "grid": false, "title": "Marital Status", "orient": "left"}], "title": {"text": "Income for different marital status", "frame": "group"}, "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "background": "white", "padding": 5, "width": 300, "style": "cell", "height": 200}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8088,7 +8632,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different relationship"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8109,26 +8653,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-3ca2c89399d748a6997140e935aff87d.vega-embed {
+  #altair-viz-6df0b295ff2942e684d779dbd2317467.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-3ca2c89399d748a6997140e935aff87d.vega-embed details,
-  #altair-viz-3ca2c89399d748a6997140e935aff87d.vega-embed details summary {
+  #altair-viz-6df0b295ff2942e684d779dbd2317467.vega-embed details,
+  #altair-viz-6df0b295ff2942e684d779dbd2317467.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-3ca2c89399d748a6997140e935aff87d"></div>
+<div id="altair-viz-6df0b295ff2942e684d779dbd2317467"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-3ca2c89399d748a6997140e935aff87d") {
-      outputDiv = document.getElementById("altair-viz-3ca2c89399d748a6997140e935aff87d");
+    if (outputDiv.id !== "altair-viz-6df0b295ff2942e684d779dbd2317467") {
+      outputDiv = document.getElementById("altair-viz-6df0b295ff2942e684d779dbd2317467");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8174,7 +8718,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 7449, "income": " <=50K", "relationship": " Not-in-family"}, {"__count": 7275, "income": " <=50K", "relationship": " Husband"}, {"__count": 823, "income": " <=50K", "relationship": " Wife"}, {"__count": 5918, "income": " >50K", "relationship": " Husband"}, {"__count": 856, "income": " >50K", "relationship": " Not-in-family"}, {"__count": 5001, "income": " <=50K", "relationship": " Own-child"}, {"__count": 3228, "income": " <=50K", "relationship": " Unmarried"}, {"__count": 218, "income": " >50K", "relationship": " Unmarried"}, {"__count": 745, "income": " >50K", "relationship": " Wife"}, {"__count": 944, "income": " <=50K", "relationship": " Other-relative"}, {"__count": 37, "income": " >50K", "relationship": " Other-relative"}, {"__count": 67, "income": " >50K", "relationship": " Own-child"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 37, "max": 7449}]}, {"name": "source_0_y_domain_relationship", "values": [{"relationship": " Not-in-family"}, {"relationship": " Husband"}, {"relationship": " Wife"}, {"relationship": " Own-child"}, {"relationship": " Unmarried"}, {"relationship": " Other-relative"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"x": {"field": "__count", "scale": "x"}, "opacity": {"value": 0.75}, "fill": {"field": "income", "scale": "color"}, "y": {"field": "relationship", "scale": "y"}, "x2": {"value": 0, "scale": "x"}, "height": {"signal": "max(0.25, bandwidth('y'))"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_relationship", "field": "relationship", "sort": true}, "range": [0, {"signal": "height"}], "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "maxExtent": 0, "domain": false, "ticks": false, "gridScale": "y", "aria": false, "minExtent": 0, "orient": "bottom", "zindex": 0, "tickCount": {"signal": "ceil(width/40)"}, "grid": true, "labels": false}, {"scale": "x", "grid": false, "tickCount": {"signal": "ceil(width/40)"}, "labelFlush": true, "title": "Count of Records", "orient": "bottom", "labelOverlap": true, "zindex": 0}, {"scale": "y", "zindex": 0, "grid": false, "orient": "left", "title": "Relationships"}], "title": {"text": "Income for different relationship", "frame": "group"}, "background": "white", "padding": 5, "width": 300, "height": 200, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}]}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 7436, "income": " <=50K", "relationship": " Not-in-family"}, {"__count": 7271, "income": " <=50K", "relationship": " Husband"}, {"__count": 823, "income": " <=50K", "relationship": " Wife"}, {"__count": 5916, "income": " >50K", "relationship": " Husband"}, {"__count": 856, "income": " >50K", "relationship": " Not-in-family"}, {"__count": 4997, "income": " <=50K", "relationship": " Own-child"}, {"__count": 3227, "income": " <=50K", "relationship": " Unmarried"}, {"__count": 218, "income": " >50K", "relationship": " Unmarried"}, {"__count": 745, "income": " >50K", "relationship": " Wife"}, {"__count": 944, "income": " <=50K", "relationship": " Other-relative"}, {"__count": 37, "income": " >50K", "relationship": " Other-relative"}, {"__count": 67, "income": " >50K", "relationship": " Own-child"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 37, "max": 7436}]}, {"name": "source_0_y_domain_relationship", "values": [{"relationship": " Not-in-family"}, {"relationship": " Husband"}, {"relationship": " Wife"}, {"relationship": " Own-child"}, {"relationship": " Unmarried"}, {"relationship": " Other-relative"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"y": {"field": "relationship", "scale": "y"}, "fill": {"field": "income", "scale": "color"}, "opacity": {"value": 0.75}, "x2": {"value": 0, "scale": "x"}, "x": {"field": "__count", "scale": "x"}, "height": {"signal": "max(0.25, bandwidth('y'))"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "zero": true, "nice": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_relationship", "field": "relationship", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "aria": false, "tickCount": {"signal": "ceil(width/40)"}, "labels": false, "grid": true, "domain": false, "maxExtent": 0, "minExtent": 0, "ticks": false, "zindex": 0, "orient": "bottom", "gridScale": "y"}, {"scale": "x", "zindex": 0, "tickCount": {"signal": "ceil(width/40)"}, "labelFlush": true, "labelOverlap": true, "orient": "bottom", "title": "Count of Records", "grid": false}, {"scale": "y", "zindex": 0, "title": "Relationships", "grid": false, "orient": "left"}], "title": {"text": "Income for different relationship", "frame": "group"}, "width": 300, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "padding": 5, "background": "white", "height": 200}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8185,7 +8729,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different occupation"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8206,26 +8750,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-6eb7f7f2e48348bda2faf84e0a83267f.vega-embed {
+  #altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-6eb7f7f2e48348bda2faf84e0a83267f.vega-embed details,
-  #altair-viz-6eb7f7f2e48348bda2faf84e0a83267f.vega-embed details summary {
+  #altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d.vega-embed details,
+  #altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-6eb7f7f2e48348bda2faf84e0a83267f"></div>
+<div id="altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-6eb7f7f2e48348bda2faf84e0a83267f") {
-      outputDiv = document.getElementById("altair-viz-6eb7f7f2e48348bda2faf84e0a83267f");
+    if (outputDiv.id !== "altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d") {
+      outputDiv = document.getElementById("altair-viz-b7353b1469b14a32aaf4fd3f0a08c00d");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8271,7 +8815,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 3263, "income": " <=50K", "occupation": " Adm-clerical"}, {"__count": 2098, "income": " <=50K", "occupation": " Exec-managerial"}, {"__count": 1284, "income": " <=50K", "occupation": " Handlers-cleaners"}, {"__count": 2281, "income": " <=50K", "occupation": " Prof-specialty"}, {"__count": 3158, "income": " <=50K", "occupation": " Other-service"}, {"__count": 1968, "income": " >50K", "occupation": " Exec-managerial"}, {"__count": 1859, "income": " >50K", "occupation": " Prof-specialty"}, {"__count": 2667, "income": " <=50K", "occupation": " Sales"}, {"__count": 929, "income": " >50K", "occupation": " Craft-repair"}, {"__count": 1277, "income": " <=50K", "occupation": " Transport-moving"}, {"__count": 879, "income": " <=50K", "occupation": " Farming-fishing"}, {"__count": 1752, "income": " <=50K", "occupation": " Machine-op-inspct"}, {"__count": 645, "income": " <=50K", "occupation": " Tech-support"}, {"__count": 283, "income": " >50K", "occupation": " Tech-support"}, {"__count": 3170, "income": " <=50K", "occupation": " Craft-repair"}, {"__count": 191, "income": " >50K", "occupation": " ?"}, {"__count": 438, "income": " <=50K", "occupation": " Protective-serv"}, {"__count": 983, "income": " >50K", "occupation": " Sales"}, {"__count": 1652, "income": " <=50K", "occupation": " ?"}, {"__count": 507, "income": " >50K", "occupation": " Adm-clerical"}, {"__count": 211, "income": " >50K", "occupation": " Protective-serv"}, {"__count": 137, "income": " >50K", "occupation": " Other-service"}, {"__count": 250, "income": " >50K", "occupation": " Machine-op-inspct"}, {"__count": 115, "income": " >50K", "occupation": " Farming-fishing"}, {"__count": 320, "income": " >50K", "occupation": " Transport-moving"}, {"__count": 8, "income": " <=50K", "occupation": " Armed-Forces"}, {"__count": 148, "income": " <=50K", "occupation": " Priv-house-serv"}, {"__count": 86, "income": " >50K", "occupation": " Handlers-cleaners"}, {"__count": 1, "income": " >50K", "occupation": " Armed-Forces"}, {"__count": 1, "income": " >50K", "occupation": " Priv-house-serv"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 1, "max": 3263}]}, {"name": "source_0_y_domain_occupation", "values": [{"occupation": " Adm-clerical"}, {"occupation": " Exec-managerial"}, {"occupation": " Handlers-cleaners"}, {"occupation": " Prof-specialty"}, {"occupation": " Other-service"}, {"occupation": " Sales"}, {"occupation": " Craft-repair"}, {"occupation": " Transport-moving"}, {"occupation": " Farming-fishing"}, {"occupation": " Machine-op-inspct"}, {"occupation": " Tech-support"}, {"occupation": " ?"}, {"occupation": " Protective-serv"}, {"occupation": " Armed-Forces"}, {"occupation": " Priv-house-serv"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"x2": {"value": 0, "scale": "x"}, "x": {"field": "__count", "scale": "x"}, "fill": {"field": "income", "scale": "color"}, "y": {"field": "occupation", "scale": "y"}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "opacity": {"value": 0.75}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_occupation", "field": "occupation", "sort": true}, "range": [0, {"signal": "height"}], "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "minExtent": 0, "domain": false, "aria": false, "labels": false, "gridScale": "y", "maxExtent": 0, "zindex": 0, "ticks": false, "orient": "bottom", "tickCount": {"signal": "ceil(width/40)"}, "grid": true}, {"scale": "x", "tickCount": {"signal": "ceil(width/40)"}, "labelFlush": true, "labelOverlap": true, "zindex": 0, "grid": false, "orient": "bottom", "title": "Count of Records"}, {"scale": "y", "orient": "left", "title": "Occupations", "zindex": 0, "grid": false}], "title": {"text": "Income for different occupation", "frame": "group"}, "height": 200, "padding": 5, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "background": "white", "width": 300}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 3261, "income": " <=50K", "occupation": " Adm-clerical"}, {"__count": 2097, "income": " <=50K", "occupation": " Exec-managerial"}, {"__count": 1283, "income": " <=50K", "occupation": " Handlers-cleaners"}, {"__count": 2278, "income": " <=50K", "occupation": " Prof-specialty"}, {"__count": 3154, "income": " <=50K", "occupation": " Other-service"}, {"__count": 1968, "income": " >50K", "occupation": " Exec-managerial"}, {"__count": 1858, "income": " >50K", "occupation": " Prof-specialty"}, {"__count": 2667, "income": " <=50K", "occupation": " Sales"}, {"__count": 929, "income": " >50K", "occupation": " Craft-repair"}, {"__count": 1277, "income": " <=50K", "occupation": " Transport-moving"}, {"__count": 877, "income": " <=50K", "occupation": " Farming-fishing"}, {"__count": 1751, "income": " <=50K", "occupation": " Machine-op-inspct"}, {"__count": 644, "income": " <=50K", "occupation": " Tech-support"}, {"__count": 283, "income": " >50K", "occupation": " Tech-support"}, {"__count": 3165, "income": " <=50K", "occupation": " Craft-repair"}, {"__count": 191, "income": " >50K", "occupation": " ?"}, {"__count": 438, "income": " <=50K", "occupation": " Protective-serv"}, {"__count": 983, "income": " >50K", "occupation": " Sales"}, {"__count": 1652, "income": " <=50K", "occupation": " ?"}, {"__count": 507, "income": " >50K", "occupation": " Adm-clerical"}, {"__count": 211, "income": " >50K", "occupation": " Protective-serv"}, {"__count": 137, "income": " >50K", "occupation": " Other-service"}, {"__count": 249, "income": " >50K", "occupation": " Machine-op-inspct"}, {"__count": 115, "income": " >50K", "occupation": " Farming-fishing"}, {"__count": 320, "income": " >50K", "occupation": " Transport-moving"}, {"__count": 8, "income": " <=50K", "occupation": " Armed-Forces"}, {"__count": 146, "income": " <=50K", "occupation": " Priv-house-serv"}, {"__count": 86, "income": " >50K", "occupation": " Handlers-cleaners"}, {"__count": 1, "income": " >50K", "occupation": " Armed-Forces"}, {"__count": 1, "income": " >50K", "occupation": " Priv-house-serv"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 1, "max": 3261}]}, {"name": "source_0_y_domain_occupation", "values": [{"occupation": " Adm-clerical"}, {"occupation": " Exec-managerial"}, {"occupation": " Handlers-cleaners"}, {"occupation": " Prof-specialty"}, {"occupation": " Other-service"}, {"occupation": " Sales"}, {"occupation": " Craft-repair"}, {"occupation": " Transport-moving"}, {"occupation": " Farming-fishing"}, {"occupation": " Machine-op-inspct"}, {"occupation": " Tech-support"}, {"occupation": " ?"}, {"occupation": " Protective-serv"}, {"occupation": " Armed-Forces"}, {"occupation": " Priv-house-serv"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"height": {"signal": "max(0.25, bandwidth('y'))"}, "x2": {"value": 0, "scale": "x"}, "opacity": {"value": 0.75}, "y": {"field": "occupation", "scale": "y"}, "x": {"field": "__count", "scale": "x"}, "fill": {"field": "income", "scale": "color"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "zero": true, "nice": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_occupation", "field": "occupation", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "domain": false, "grid": true, "labels": false, "tickCount": {"signal": "ceil(width/40)"}, "maxExtent": 0, "orient": "bottom", "gridScale": "y", "aria": false, "minExtent": 0, "ticks": false, "zindex": 0}, {"scale": "x", "labelFlush": true, "title": "Count of Records", "grid": false, "labelOverlap": true, "zindex": 0, "orient": "bottom", "tickCount": {"signal": "ceil(width/40)"}}, {"scale": "y", "orient": "left", "grid": false, "title": "Occupations", "zindex": 0}], "title": {"text": "Income for different occupation", "frame": "group"}, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "width": 300, "padding": 5, "height": 200, "background": "white"}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8282,7 +8826,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different workclass"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8303,26 +8847,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4.vega-embed {
+  #altair-viz-1177f93f6baa4707850a55c02f7c5887.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4.vega-embed details,
-  #altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4.vega-embed details summary {
+  #altair-viz-1177f93f6baa4707850a55c02f7c5887.vega-embed details,
+  #altair-viz-1177f93f6baa4707850a55c02f7c5887.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4"></div>
+<div id="altair-viz-1177f93f6baa4707850a55c02f7c5887"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4") {
-      outputDiv = document.getElementById("altair-viz-1d4f8dc4dfd84f20adf85e999f5a78d4");
+    if (outputDiv.id !== "altair-viz-1177f93f6baa4707850a55c02f7c5887") {
+      outputDiv = document.getElementById("altair-viz-1177f93f6baa4707850a55c02f7c5887");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8368,7 +8912,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 945, "income": " <=50K", "workclass": " State-gov"}, {"__count": 1817, "income": " <=50K", "workclass": " Self-emp-not-inc"}, {"__count": 17733, "income": " <=50K", "workclass": " Private"}, {"__count": 724, "income": " >50K", "workclass": " Self-emp-not-inc"}, {"__count": 4963, "income": " >50K", "workclass": " Private"}, {"__count": 353, "income": " >50K", "workclass": " State-gov"}, {"__count": 589, "income": " <=50K", "workclass": " Federal-gov"}, {"__count": 617, "income": " >50K", "workclass": " Local-gov"}, {"__count": 191, "income": " >50K", "workclass": " ?"}, {"__count": 1476, "income": " <=50K", "workclass": " Local-gov"}, {"__count": 371, "income": " >50K", "workclass": " Federal-gov"}, {"__count": 494, "income": " <=50K", "workclass": " Self-emp-inc"}, {"__count": 1645, "income": " <=50K", "workclass": " ?"}, {"__count": 622, "income": " >50K", "workclass": " Self-emp-inc"}, {"__count": 14, "income": " <=50K", "workclass": " Without-pay"}, {"__count": 7, "income": " <=50K", "workclass": " Never-worked"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 7, "max": 17733}]}, {"name": "source_0_y_domain_workclass", "values": [{"workclass": " State-gov"}, {"workclass": " Self-emp-not-inc"}, {"workclass": " Private"}, {"workclass": " Federal-gov"}, {"workclass": " Local-gov"}, {"workclass": " ?"}, {"workclass": " Self-emp-inc"}, {"workclass": " Without-pay"}, {"workclass": " Never-worked"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"fill": {"field": "income", "scale": "color"}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "x": {"field": "__count", "scale": "x"}, "y": {"field": "workclass", "scale": "y"}, "opacity": {"value": 0.75}, "x2": {"value": 0, "scale": "x"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_workclass", "field": "workclass", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "domain": false, "ticks": false, "tickCount": {"signal": "ceil(width/40)"}, "grid": true, "minExtent": 0, "orient": "bottom", "labels": false, "aria": false, "maxExtent": 0, "gridScale": "y", "zindex": 0}, {"scale": "x", "zindex": 0, "orient": "bottom", "labelFlush": true, "title": "Count of Records", "labelOverlap": true, "grid": false, "tickCount": {"signal": "ceil(width/40)"}}, {"scale": "y", "zindex": 0, "orient": "left", "grid": false, "title": "Workclass"}], "title": {"text": "Income for different workclass", "frame": "group"}, "width": 300, "height": 200, "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "style": "cell", "background": "white", "padding": 5}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 945, "income": " <=50K", "workclass": " State-gov"}, {"__count": 1816, "income": " <=50K", "workclass": " Self-emp-not-inc"}, {"__count": 17712, "income": " <=50K", "workclass": " Private"}, {"__count": 724, "income": " >50K", "workclass": " Self-emp-not-inc"}, {"__count": 4961, "income": " >50K", "workclass": " Private"}, {"__count": 353, "income": " >50K", "workclass": " State-gov"}, {"__count": 589, "income": " <=50K", "workclass": " Federal-gov"}, {"__count": 617, "income": " >50K", "workclass": " Local-gov"}, {"__count": 191, "income": " >50K", "workclass": " ?"}, {"__count": 1476, "income": " <=50K", "workclass": " Local-gov"}, {"__count": 371, "income": " >50K", "workclass": " Federal-gov"}, {"__count": 494, "income": " <=50K", "workclass": " Self-emp-inc"}, {"__count": 1645, "income": " <=50K", "workclass": " ?"}, {"__count": 622, "income": " >50K", "workclass": " Self-emp-inc"}, {"__count": 14, "income": " <=50K", "workclass": " Without-pay"}, {"__count": 7, "income": " <=50K", "workclass": " Never-worked"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 7, "max": 17712}]}, {"name": "source_0_y_domain_workclass", "values": [{"workclass": " State-gov"}, {"workclass": " Self-emp-not-inc"}, {"workclass": " Private"}, {"workclass": " Federal-gov"}, {"workclass": " Local-gov"}, {"workclass": " ?"}, {"workclass": " Self-emp-inc"}, {"workclass": " Without-pay"}, {"workclass": " Never-worked"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"x": {"field": "__count", "scale": "x"}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "x2": {"value": 0, "scale": "x"}, "y": {"field": "workclass", "scale": "y"}, "fill": {"field": "income", "scale": "color"}, "opacity": {"value": 0.75}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_workclass", "field": "workclass", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "aria": false, "gridScale": "y", "maxExtent": 0, "minExtent": 0, "tickCount": {"signal": "ceil(width/40)"}, "ticks": false, "zindex": 0, "grid": true, "domain": false, "orient": "bottom", "labels": false}, {"scale": "x", "title": "Count of Records", "labelOverlap": true, "orient": "bottom", "tickCount": {"signal": "ceil(width/40)"}, "zindex": 0, "grid": false, "labelFlush": true}, {"scale": "y", "grid": false, "zindex": 0, "title": "Workclass", "orient": "left"}], "title": {"text": "Income for different workclass", "frame": "group"}, "padding": 5, "background": "white", "height": 200, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "width": 300}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8379,7 +8923,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different race"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8400,26 +8944,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-c271aeb5810a4e598ed708c8a86b0de0.vega-embed {
+  #altair-viz-b0adfe6ff00a45baad876d0341465966.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-c271aeb5810a4e598ed708c8a86b0de0.vega-embed details,
-  #altair-viz-c271aeb5810a4e598ed708c8a86b0de0.vega-embed details summary {
+  #altair-viz-b0adfe6ff00a45baad876d0341465966.vega-embed details,
+  #altair-viz-b0adfe6ff00a45baad876d0341465966.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-c271aeb5810a4e598ed708c8a86b0de0"></div>
+<div id="altair-viz-b0adfe6ff00a45baad876d0341465966"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-c271aeb5810a4e598ed708c8a86b0de0") {
-      outputDiv = document.getElementById("altair-viz-c271aeb5810a4e598ed708c8a86b0de0");
+    if (outputDiv.id !== "altair-viz-b0adfe6ff00a45baad876d0341465966") {
+      outputDiv = document.getElementById("altair-viz-b0adfe6ff00a45baad876d0341465966");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8465,7 +9009,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 20699, "income": " <=50K", "race": " White"}, {"__count": 2737, "income": " <=50K", "race": " Black"}, {"__count": 7117, "income": " >50K", "race": " White"}, {"__count": 387, "income": " >50K", "race": " Black"}, {"__count": 276, "income": " >50K", "race": " Asian-Pac-Islander"}, {"__count": 275, "income": " <=50K", "race": " Amer-Indian-Eskimo"}, {"__count": 246, "income": " <=50K", "race": " Other"}, {"__count": 763, "income": " <=50K", "race": " Asian-Pac-Islander"}, {"__count": 25, "income": " >50K", "race": " Other"}, {"__count": 36, "income": " >50K", "race": " Amer-Indian-Eskimo"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 25, "max": 20699}]}, {"name": "source_0_y_domain_race", "values": [{"race": " White"}, {"race": " Black"}, {"race": " Asian-Pac-Islander"}, {"race": " Amer-Indian-Eskimo"}, {"race": " Other"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"height": {"signal": "max(0.25, bandwidth('y'))"}, "opacity": {"value": 0.75}, "fill": {"field": "income", "scale": "color"}, "x": {"field": "__count", "scale": "x"}, "y": {"field": "race", "scale": "y"}, "x2": {"value": 0, "scale": "x"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_race", "field": "race", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "zindex": 0, "ticks": false, "grid": true, "aria": false, "tickCount": {"signal": "ceil(width/40)"}, "minExtent": 0, "maxExtent": 0, "gridScale": "y", "domain": false, "labels": false, "orient": "bottom"}, {"scale": "x", "labelFlush": true, "grid": false, "title": "Count of Records", "tickCount": {"signal": "ceil(width/40)"}, "labelOverlap": true, "orient": "bottom", "zindex": 0}, {"scale": "y", "title": "Race", "zindex": 0, "grid": false, "orient": "left"}], "title": {"text": "Income for different race", "frame": "group"}, "background": "white", "style": "cell", "height": 200, "padding": 5, "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "width": 300}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 20680, "income": " <=50K", "race": " White"}, {"__count": 2735, "income": " <=50K", "race": " Black"}, {"__count": 7115, "income": " >50K", "race": " White"}, {"__count": 387, "income": " >50K", "race": " Black"}, {"__count": 276, "income": " >50K", "race": " Asian-Pac-Islander"}, {"__count": 275, "income": " <=50K", "race": " Amer-Indian-Eskimo"}, {"__count": 246, "income": " <=50K", "race": " Other"}, {"__count": 762, "income": " <=50K", "race": " Asian-Pac-Islander"}, {"__count": 25, "income": " >50K", "race": " Other"}, {"__count": 36, "income": " >50K", "race": " Amer-Indian-Eskimo"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 25, "max": 20680}]}, {"name": "source_0_y_domain_race", "values": [{"race": " White"}, {"race": " Black"}, {"race": " Asian-Pac-Islander"}, {"race": " Amer-Indian-Eskimo"}, {"race": " Other"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"x": {"field": "__count", "scale": "x"}, "fill": {"field": "income", "scale": "color"}, "x2": {"value": 0, "scale": "x"}, "opacity": {"value": 0.75}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "y": {"field": "race", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_race", "field": "race", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "zindex": 0, "grid": true, "minExtent": 0, "maxExtent": 0, "tickCount": {"signal": "ceil(width/40)"}, "orient": "bottom", "gridScale": "y", "domain": false, "labels": false, "aria": false, "ticks": false}, {"scale": "x", "grid": false, "labelFlush": true, "title": "Count of Records", "labelOverlap": true, "orient": "bottom", "tickCount": {"signal": "ceil(width/40)"}, "zindex": 0}, {"scale": "y", "orient": "left", "grid": false, "title": "Race", "zindex": 0}], "title": {"text": "Income for different race", "frame": "group"}, "height": 200, "style": "cell", "background": "white", "width": 300, "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "padding": 5}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8476,7 +9020,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">"Income for different sex"</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -8497,26 +9041,26 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-86e75b361342489f92263f88866fbfe2.vega-embed {
+  #altair-viz-4c3dcb42f9d94970a9426e8547988b67.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-86e75b361342489f92263f88866fbfe2.vega-embed details,
-  #altair-viz-86e75b361342489f92263f88866fbfe2.vega-embed details summary {
+  #altair-viz-4c3dcb42f9d94970a9426e8547988b67.vega-embed details,
+  #altair-viz-4c3dcb42f9d94970a9426e8547988b67.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-86e75b361342489f92263f88866fbfe2"></div>
+<div id="altair-viz-4c3dcb42f9d94970a9426e8547988b67"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-86e75b361342489f92263f88866fbfe2") {
-      outputDiv = document.getElementById("altair-viz-86e75b361342489f92263f88866fbfe2");
+    if (outputDiv.id !== "altair-viz-4c3dcb42f9d94970a9426e8547988b67") {
+      outputDiv = document.getElementById("altair-viz-4c3dcb42f9d94970a9426e8547988b67");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8562,7 +9106,7 @@ memory usage: 3.7+ MB
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 15128, "income": " <=50K", "sex": " Male"}, {"__count": 9592, "income": " <=50K", "sex": " Female"}, {"__count": 6662, "income": " >50K", "sex": " Male"}, {"__count": 1179, "income": " >50K", "sex": " Female"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 1179, "max": 15128}]}, {"name": "source_0_y_domain_sex", "values": [{"sex": " Male"}, {"sex": " Female"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"height": {"signal": "max(0.25, bandwidth('y'))"}, "x": {"field": "__count", "scale": "x"}, "y": {"field": "sex", "scale": "y"}, "fill": {"field": "income", "scale": "color"}, "x2": {"value": 0, "scale": "x"}, "opacity": {"value": 0.75}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_sex", "field": "sex", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "labels": false, "aria": false, "ticks": false, "zindex": 0, "domain": false, "tickCount": {"signal": "ceil(width/40)"}, "gridScale": "y", "maxExtent": 0, "grid": true, "orient": "bottom", "minExtent": 0}, {"scale": "x", "orient": "bottom", "title": "Count of Records", "labelOverlap": true, "tickCount": {"signal": "ceil(width/40)"}, "zindex": 0, "labelFlush": true, "grid": false}, {"scale": "y", "zindex": 0, "title": "Sex", "orient": "left", "grid": false}], "title": {"text": "Income for different sex", "frame": "group"}, "height": 200, "width": 300, "style": "cell", "background": "white", "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "padding": 5}, {"mode": "vega"});
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 15115, "income": " <=50K", "sex": " Male"}, {"__count": 9583, "income": " <=50K", "sex": " Female"}, {"__count": 6660, "income": " >50K", "sex": " Male"}, {"__count": 1179, "income": " >50K", "sex": " Female"}]}, {"name": "source_0_x_domain___count", "values": [{"min": 1179, "max": 15115}]}, {"name": "source_0_y_domain_sex", "values": [{"sex": " Male"}, {"sex": " Female"}]}, {"name": "source_0_color_domain_income", "values": [{"income": " <=50K"}, {"income": " >50K"}]}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"fill": {"field": "income", "scale": "color"}, "x2": {"value": 0, "scale": "x"}, "y": {"field": "sex", "scale": "y"}, "x": {"field": "__count", "scale": "x"}, "height": {"signal": "max(0.25, bandwidth('y'))"}, "opacity": {"value": 0.75}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": [{"signal": "(data(\"source_0_x_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_x_domain___count\")[0] || {}).max"}], "range": [0, {"signal": "width"}], "zero": true, "nice": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_sex", "field": "sex", "sort": true}, "range": [0, {"signal": "height"}], "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_income", "field": "income", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "labels": false, "maxExtent": 0, "tickCount": {"signal": "ceil(width/40)"}, "minExtent": 0, "ticks": false, "gridScale": "y", "domain": false, "zindex": 0, "grid": true, "aria": false, "orient": "bottom"}, {"scale": "x", "grid": false, "tickCount": {"signal": "ceil(width/40)"}, "labelOverlap": true, "zindex": 0, "orient": "bottom", "title": "Count of Records", "labelFlush": true}, {"scale": "y", "zindex": 0, "title": "Sex", "grid": false, "orient": "left"}], "title": {"text": "Income for different sex", "frame": "group"}, "legends": [{"fill": "color", "symbolType": "square", "title": "income", "encode": {"symbols": {"update": {"opacity": {"value": 0.75}}}}}], "padding": 5, "height": 200, "background": "white", "style": "cell", "width": 300}, {"mode": "vega"});
 </script>
 </div>
 </div>
@@ -8586,7 +9130,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">train_df</span><span class="p">,</span> <span class="n">test_df</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">data_adult</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
@@ -8599,6 +9143,148 @@ memory usage: 3.7+ MB
     <span class="n">test_df</span><span class="p">[</span><span class="s2">"income"</span><span class="p">],</span>
 <span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e40339c4-482c-4e3b-b32d-d64bb88a4592">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Data-Validation-3:-Target-/-Response-Distribution">Data Validation 3: Target / Response Distribution<a class="anchor-link" href="#Data-Validation-3:-Target-/-Response-Distribution">¶</a></h2><p>The following validation will be performed:</p>
+<ul>
+<li>Target/response variable follows expected distribution</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8b128558-353c-4b74-851d-7dd6a4be8be8">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">adult_train_ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"income"</span><span class="p">,</span> <span class="n">cat_features</span><span class="o">=</span><span class="p">[])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6027da3a-44ef-427c-87ca-67a935890f27">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">train_df</span><span class="p">[</span><span class="s2">"income"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>income
+ &lt;=50K    19802
+ &gt;50K      6227
+Name: count, dtype: int64</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=eb25604a-81c3-4f66-945d-3ae49203cdc6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">check_dist</span> <span class="o">=</span> <span class="n">ClassImbalance</span><span class="p">()</span><span class="o">.</span><span class="n">add_condition_class_ratio_less_than</span><span class="p">(</span><span class="mf">0.4</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">adult_train_ds</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">check_dist</span><span class="o">.</span><span class="n">passed_conditions</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Error message here"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Data Validation 3 passed: The target has at least a 40%/60</span><span class="si">% s</span><span class="s2">plit!"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Data Validation 3 passed: The target has at least a 40%/60% split!
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d8e5b1e7-eeb3-415c-923d-c2ecbc7e16eb">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Data-Validation-4:-Deep-Checks-Validation">Data Validation 4: Deep Checks Validation<a class="anchor-link" href="#Data-Validation-4:-Deep-Checks-Validation">¶</a></h2><p>The following deepchecks validations will be performed:</p>
+<ul>
+<li>No anomalous correlations between target/response variable and features/explanatory variables</li>
+<li>No anomalous correlations between features/explanatory variables</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bb7a71e8-4f71-4360-b2a6-e57344bac8ee">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">check_feat_label_corr</span> <span class="o">=</span> <span class="n">FeatureLabelCorrelation</span><span class="p">()</span><span class="o">.</span><span class="n">add_condition_feature_pps_less_than</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="n">check_feat_label_corr_result</span> <span class="o">=</span> <span class="n">check_feat_label_corr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">adult_train_ds</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">check_feat_label_corr_result</span><span class="o">.</span><span class="n">passed_conditions</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Feature-Label correlation exceeds the maximum acceptable threshold."</span><span class="p">)</span>
+
+<span class="n">check_feat_feat_corr</span> <span class="o">=</span> <span class="n">FeatureFeatureCorrelation</span><span class="p">()</span><span class="o">.</span><span class="n">add_condition_max_number_of_pairs_above_threshold</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">check_feat_feat_corr_result</span> <span class="o">=</span> <span class="n">check_feat_feat_corr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">adult_train_ds</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">check_feat_feat_corr_result</span><span class="o">.</span><span class="n">passed_conditions</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Feature-Feature correlation exceeds the maximum acceptable threshold."</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Data Validation 4 passed: Deep checks validation has been performed successfully!"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Data Validation 4 passed: Deep checks validation has been performed successfully!
+</pre>
 </div>
 </div>
 </div>
@@ -8620,7 +9306,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"marital-status"</span><span class="p">,</span> <span class="s2">"relationship"</span><span class="p">,</span> <span class="s2">"occupation"</span><span class="p">,</span> <span class="s2">"workclass"</span><span class="p">,</span> <span class="s2">"race"</span><span class="p">]</span>
@@ -8648,7 +9334,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">binary_transformer</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="s2">"if_binary"</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -8684,7 +9370,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">()</span>
@@ -8700,7 +9386,7 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>#sk-container-id-1 {color: black;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div class="sk-top-container" id="sk-container-id-1"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('columntransformer',
                  ColumnTransformer(transformers=[('onehotencoder',
@@ -8772,7 +9458,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -8786,9 +9472,9 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>0.8179130835380836</pre>
+<pre>0.7979177071727689</pre>
 </div>
 </div>
 </div>
@@ -8810,7 +9496,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">test_score</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
@@ -8825,9 +9511,9 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>0.8076155381544603</pre>
+<pre>0.7965580823601721</pre>
 </div>
 </div>
 </div>
@@ -8848,7 +9534,7 @@ memory usage: 3.7+ MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">cm</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="o">.</span><span class="n">from_estimator</span><span class="p">(</span>
@@ -8869,15 +9555,15 @@ memory usage: 3.7+ MB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>&lt;sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x16da08210&gt;</pre>
+<pre>&lt;sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x2b0892b10&gt;</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
-<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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bYKtra0Ys3XrVsyePVu8umns2LFYt26dyfORCYLQyp/CID2lpaVQKpXQ/tQFrgp296h1GunzUEtPgajZ1Am1OIDPodPpDBbQWsqNnxOpp4LhrLA1fsIdXCurR0yf080215bGigwREZFE3Viwa94YrbtewXIAERERWS1WZIiIiCRKL9hAb8JVR42P0borMkxkiIiIJIqtJePYWiIiIiKrxYoMERGRROkB1Aum3bK/sTFaMyYyREREEmWZG+K17uZL6353RERE1KqxIkNERCRRpj4r6XZjtGZMZIiIiCRKDxn0MHeNjHnnSx0TGSIiIoliRca41v3uiIiIqFVjRYaIiEiiLHNDvNZds2AiQ0REJFF6QQa9ufeRMfN8qWvdaRoRERG1aqzIEBERSZTeAq2l1n5DPCYyREREEmWZp1+37kSmdb87IiIiatVYkSEiIpKoeshQb+YN7cw9X+qYyBAREUkUW0vGte53R0RERK0aKzJEREQSVQ/zW0P1lpmKZDGRISIikii2loxjIkNERCRRfGikca373REREVGrxooMERGRRAmQQW/mGhmBl18TERFRS2BrybjW/e6IiIioVWNFhoiISKL0ggx6wbzWkLnnSx0TGSIiIomqt8DTr809X+pa97sjIiKiVo0VGSIiIolia8k4JjJEREQSpYcN9GY2T8w9X+pa97sjIiKiVo0VGSIiIomqF2SoN7M1ZO75UsdEhoiISKK4RsY4JjJEREQSJVjg6dcC7+xLRERE94v169ejd+/ecHV1haurK8LDw7F7927x+PTp0yGTyQy2sLAwgzGqq6sxa9YseHh4wMXFBWPHjsWlS5cMYrRaLWJiYqBUKqFUKhETE4OSkhKT58tEhoiISKLqIbPIZoqOHTti2bJlOHHiBE6cOIEhQ4Zg3LhxyM7OFmNGjRqFgoICcdu1a5fBGPHx8UhLS8P27dtx+PBhlJeXIyoqCvX19WJMdHQ0srKyoFaroVarkZWVhZiYGJO/R2wtERERSZReMH+Ni164/t/S0lKD/XK5HHK5vEH8mDFjDF4vXboU69evR0ZGBnr16iWeq1KpGv16Op0OH330EVJTUzFs2DAAwJYtW+Dr64t9+/Zh5MiRyMnJgVqtRkZGBkJDQwEAycnJCA8PR25uLgIDA5v8/liRISIiug/4+vqKbRylUomkpCSj59TX12P79u2o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tGgRYmNj8dprr+H8+fN45513THq/DzzwAOrq6rB27VqMGTMG3333Hd5///0Gcfb29pg1axbee+892Nvb46WXXkJYWJiY2LzxxhuIioqCr68vJk6cCBsbG/zwww84ffo03nrrLdP/RxBRi+BVS0RWTiaTYdeuXXjsscfwzDPPoFu3bpgyZQrOnz8vXmU0efJkvPHGG3j11VcREhKCCxcu4Pnnn7/juK+//jrmzp2LN954Az169MDkyZNRVFQE4Pr6k/feew8bNmyAj48Pxo0bBwB49tln8eGHH2LTpk0IDg7GoEGDsGnTJvFy7TZt2uCLL77A2bNn0adPHyxatAjLly836f0+9NBDWLVqFZYvX46goCBs3boVSUlJDeKcnZ3x6quvIjo6GuHh4XBycsL27dvF4yNHjsSXX36JvXv3on///ggLC8OqVavg5+dn0nyIqGXJBEs0rYmIiIhaACsyREREZLWYyBAREZHVYiJDREREVouJDBEREVktJjJERERktZjIEBERkdViIkNERERWi4kMERERWS0mMkRERGS1mMgQERGR1WIiQ0RERFbr/wPdojpOPCaaYgAAAABJRU5ErkJggg=="/>
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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"/>
 </div>
 </div>
 </div>
