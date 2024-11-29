@@ -28,3 +28,5 @@ tests/__pycache__
 **.conda/
 
 **.validation_errors.log
+
+notebook/**/validation_errors.log
