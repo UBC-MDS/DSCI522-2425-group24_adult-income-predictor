@@ -26,3 +26,5 @@ tests/__pycache__
 
 **.cache/
 **.conda/
+
+**.validation_errors.log
