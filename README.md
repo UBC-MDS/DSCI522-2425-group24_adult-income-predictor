@@ -59,7 +59,7 @@ See GIF below for more details:
 ![gif](https://raw.githubusercontent.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/refs/heads/main/img/instruction.gif)
 
 3. To run the analysis,
-open a terminal (in the virtual jupyter notebook environment) and run the following commands:
+open a terminal (in the virtual jupyter notebook environment) and run the following commands
 
 ```{bash}
 python scripts/download_data.py \
