@@ -55,11 +55,36 @@ docker compose up
 2. In the terminal, look for a URL that starts with
 `http://127.0.0.1:8888/lab?token=` and copy and paste that URL into your browser.
 
-3. You will now see the virtual jupyter notebook. To run the analysis,
-navigate to `notebooks/adult_income_predictor_report.ipynb` in Jupyter Lab and under the "Kernel" menu click "Restart Kernel and Run All Cells...".
-
 See GIF below for more details:
 ![gif](https://raw.githubusercontent.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/refs/heads/main/img/instruction.gif)
+
+3. To run the analysis,
+open a terminal and run the following commands:
+
+```{bash}
+python scripts/download_data.py \
+    --url="https://archive.ics.uci.edu/static/public/2/adult.zip" \
+    --target_dir="data/raw"
+
+python scripts/read_and_validate.py \
+    --raw_dir="data/raw/adult.data" \
+    --processor_dir="data/processed"
+
+python scripts/eda.py \
+    --processed_dir="data/processed/cleaned_data.csv" \
+    --results_dir="results/figures"
+
+python scripts/split_and_fit.py \
+    --processed_dir="data/processed/cleaned_data.csv" \
+    --results_dir="results/figures" \
+    --preprocessed_dir="data/processed"
+
+python scripts/evaluate_model.py \
+    --x_dir="data/processed/X_test.csv" \
+    --y_dir="data/processed/y_test.csv" \
+    --results_dir="results/figures" \
+    --pickle_loc="results/figures/model.pickle"
+```
 
 ### Clean up
 

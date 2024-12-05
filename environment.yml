@@ -14,6 +14,9 @@ dependencies:
   - vega_datasets=0.9.0
   - vegafusion=1.6.9
   - pip=24.3.1
+  - requests=2.31.0
+  - click=8.1.7
+  - quarto=1.5.57
   - pip:
     - deepchecks==0.18.1
      

@@ -1,9 +1,6 @@
 # Don't commit checkpoint files
 ipynb_checkpoints/
 
-# Don't commit data folders
-data/
-
 # Don't commit misc files
 .DS_Store
 
