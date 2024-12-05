@@ -9,3 +9,14 @@ python scripts/read_and_validate.py \
 python scripts/eda.py \
     --processed_dir="data/processed/cleaned_data.csv" \
     --results_dir="results/figures"
+
+python scripts/split_and_fit.py \
+    --processed_dir="data/processed/cleaned_data.csv" \
+    --results_dir="results/figures" \
+    --preprocessed_dir="data/processed"
+
+python scripts/evaluate_model.py \
+    --x_dir="data/processed/X_test.csv" \
+    --y_dir="data/processed/y_test.csv" \
+    --results_dir="results/figures" \
+    --pickle_loc="results/figures/model.pickle"
