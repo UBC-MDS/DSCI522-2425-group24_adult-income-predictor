@@ -143,12 +143,11 @@ def main(raw_dir, processor_dir):
     # Filter out invalid rows based on the error cases
     if not error_cases.empty:
         invalid_indices = error_cases["index"].dropna().unique()
-        validated_data = (
-            data.drop(index=invalid_indices)
-            .reset_index(drop=True)
-            .drop_duplicates()
-            .dropna(how="all")
-        )
+        validated_data = data
+        validated_data.drop(index=invalid_indices)
+        validated_data = validated_data.reset_index(drop=True)
+        validated_data = validated_data.drop_duplicates()
+        validated_data = validated_data.dropna(how="all")
     else:
         validated_data = data
 
