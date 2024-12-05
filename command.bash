@@ -13,7 +13,8 @@ python scripts/eda.py \
 python scripts/split_and_fit.py \
     --processed_dir="data/processed/cleaned_data.csv" \
     --results_dir="results/figures" \
-    --preprocessed_dir="data/processed"
+    --preprocessed_dir="data/processed" \
+    --random_seed=123
 
 python scripts/evaluate_model.py \
     --x_dir="data/processed/X_test.csv" \
