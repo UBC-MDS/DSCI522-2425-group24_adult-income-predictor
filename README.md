@@ -78,7 +78,7 @@ python scripts/split_and_fit.py \
     --processed_dir="data/processed/cleaned_data.csv" \
     --results_dir="results/figures" \
     --preprocessed_dir="data/processed" \
-    --random_seed=123
+    --random_seed=522
 
 python scripts/evaluate_model.py \
     --x_dir="data/processed/X_test.csv" \
