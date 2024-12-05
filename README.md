@@ -59,7 +59,7 @@ See GIF below for more details:
 ![gif](https://raw.githubusercontent.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/refs/heads/main/img/instruction.gif)
 
 3. To run the analysis,
-open a terminal (in the virtual jupyter notebook environment) and run the following commands:
+open a terminal (in the virtual jupyter notebook environment) and run the following commands
 
 ```{bash}
 python scripts/download_data.py \
@@ -77,7 +77,8 @@ python scripts/eda.py \
 python scripts/split_and_fit.py \
     --processed_dir="data/processed/cleaned_data.csv" \
     --results_dir="results/figures" \
-    --preprocessed_dir="data/processed"
+    --preprocessed_dir="data/processed" \
+    --random_seed=522
 
 python scripts/evaluate_model.py \
     --x_dir="data/processed/X_test.csv" \

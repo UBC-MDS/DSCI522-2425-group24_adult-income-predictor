@@ -26,7 +26,8 @@ from deepchecks.tabular.checks import ClassImbalance
 @click.option('--processed_dir', type=str, help="Path to processed training data (CSV file)", required=True)
 @click.option('--preprocessed_dir', type=str, help="Path to save split data", required=True)
 @click.option('--results_dir', type=str, help="Path to the directory where the plots will be saved", required=True)
-def main(processed_dir, preprocessed_dir, results_dir):
+@click.option('--random_seed', type=int, help="Random seed that will be used in data split", required=True)
+def main(processed_dir, preprocessed_dir, results_dir, random_seed):
     """
     Main function to process data, validate it, train a KNN classifier, and save the trained model.
 
@@ -36,6 +37,8 @@ def main(processed_dir, preprocessed_dir, results_dir):
         Path to the processed training data in CSV format.
     results_dir : str
         Path to the directory where the trained model and any results will be saved.
+    random_seed : int
+        Selected seed for test data split
 
     Workflow:
     ---------
@@ -55,7 +58,7 @@ def main(processed_dir, preprocessed_dir, results_dir):
     print(f"Loaded data from {processed_dir} with shape {data_adult.shape}")
 
     # Data Split: Split the data into training and testing sets (80% train, 20% test)
-    train_df, test_df = train_test_split(data_adult, test_size=0.20, random_state=123)
+    train_df, test_df = train_test_split(data_adult, test_size=0.20, random_state=random_seed)
     X_train, y_train = (
         train_df.drop(columns=['income']),
         train_df["income"],
