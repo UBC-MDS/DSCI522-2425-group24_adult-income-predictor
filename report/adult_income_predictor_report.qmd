@@ -1,13 +1,16 @@
 ---
 title: Adult Income Predictor Report
-jupyter:
-  kernelspec:
-    display_name: 'Python [conda env:522-group-24]'
-    language: python
-    name: conda-env-522-group-24-py
+format:
+    html:
+        toc: true
+        toc-depth: 2
+    pdf:
+        toc: true
+        toc-depth: 2
+#bibliography: references.bib
+execute:
+    echo: false
 ---
-
-
 
 - DSCI 522 - Workflows
 - MDS 2024-2025
@@ -16,7 +19,7 @@ jupyter:
 
 ## Summary
 
-This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau, contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately 80%, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
+This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau (Becker, B. & Kohavi INSERT REFERENCE), contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately 80%, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
 
 ## Introduction
 
@@ -26,413 +29,72 @@ The model described in this notebook, looks to use a trained "Nearest Neighbors"
 
 The model looks to predict whether or not an individual's income exceeds $50K/yr based on the selected categorical socioeconomic features. For simplicity, only selected categorical features from the original data set. These features are specifically encoded based on their content prior to training the kNN classifier used for predictions. 
 
-**Note**: The original data set's reference information can be found at the end of this document. 
+# Data Validation
 
-# Setup
-
-```{python}
-import os
-import requests
-import zipfile
-import json
-import logging
-import pandas as pd
-import pandera as pa
-import altair as alt
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.compose import make_column_transformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.metrics import ConfusionMatrixDisplay 
-from deepchecks.tabular import Dataset
-from deepchecks.tabular.checks import FeatureLabelCorrelation
-from deepchecks.tabular.checks.data_integrity import FeatureFeatureCorrelation
-from deepchecks.tabular.checks import ClassImbalance
-alt.data_transformers.enable('vegafusion')
-```
-
-# Download and Extract Dataset
-
-```{python}
-# download data as zip and extract
-url = "https://archive.ics.uci.edu/static/public/2/adult.zip"
-
-request = requests.get(url)
-os.makedirs("../data/raw", exist_ok=True)
-
-with open("../data/raw/adult.zip", 'wb') as f:
-    f.write(request.content)
-
-with zipfile.ZipFile("../data/raw/adult.zip", 'r') as zip_ref:
-    zip_ref.extractall("../data/raw")
-```
-
-# Data Validation 1: Raw Data File Format
-
-```{python}
-file_path = "../data/raw/adult.data"
-if not os.path.exists(file_path):
-    raise FileNotFoundError(f"Unable to find raw file in {file_path}. Please see the download step to investigate.")
-if not file_path.endswith('.data'):
-    raise ValueError(f"{file_path} is not a DATA file. Please see the download step to investigate.")
-
-print("Data Validation 1 passed: Data File Format has been checked and verified!")
-```
-
-# Load and Preview the Dataset
-
-The following cell loads and displays the original data set. 
-
-It also adds names to the columns aligned to the description from the data set location in the UC Irvine Machine Learning Repository.
-
-```{python}
-data_adult = pd.read_csv("../data/raw/adult.data", names = ['age', 'workclass', 'fnlwgt', 'education', 'education-num', 'marital-status', 'occupation', 'relationship', 'race', 'sex', 'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income'])
-data_adult.head()
-```
-
-# Data Validation 2: DataFrame Checks
-
-To ensure that the analysis is not influenced by erroneous data, the following cells aim to validate the quality of the loaded data before we perform such analyses. 
-
-In this section, the loaded data will be validated for the following characteristics:
-
-- Correct column names
-- No empty observations
-- Missingness not beyond expected threshold
-- Correct data types in each column
-- No duplicate observations
-- No outlier or anomalous values
-- Correct category levels (i.e., no string mismatches or single values)
-
-Note that a log file called "validation_errors.log" will be created in this notebook location documenting the errors found by the validation process.
-
-```{python}
-# Configure logging
-logging.basicConfig(
-    filename="validation_errors.log",
-    filemode="w",
-    format="%(asctime)s - %(message)s",
-    level=logging.INFO,
-)
-```
-
-Validation checks below:
-
-```{python}
-# Define the schema
-schema = pa.DataFrameSchema(
-    {
-        "age": pa.Column(int, pa.Check.between(0, 120), nullable=True),
-        "age": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'age' column.")),
-        
-        "workclass": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked"]), error="Invalid value for 'workclass'."), nullable=True),
-        "workclass": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'workclass' column.")),
-        
-        "fnlwgt": pa.Column(int, nullable=True),
-        "fnlwgt": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'fnlwgt' column.")),
-        
-        "education": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["Bachelors", "Some-college", "11th", "HS-grad", "Prof-school", "Assoc-acdm", "Assoc-voc", "9th", "7th-8th", "12th", "Masters", "1st-4th", "10th", "Doctorate", "5th-6th", "Preschool"]), error="Invalid value for 'education'."), nullable=True),
-        "education": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'education' column.")),
-        
-        "education-num": pa.Column(int, pa.Check.between(0, 50), nullable=True),
-        "education-num": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'education-num' column.")),
-        
-        "marital-status": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["Married-civ-spouse", "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse"]), error="Invalid value for 'marital-status'."), nullable=True),
-        "marital-status": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'marital-status' column.")),
-        
-        "occupation": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["Tech-support", "Craft-repair", "Other-service", "Sales", "Exec-managerial", "Prof-specialty", "Handlers-cleaners", "Machine-op-inspct", "Adm-clerical", "Farming-fishing", "Transport-moving", "Priv-house-serv", "Protective-serv", "Armed-Forces"]), error="Invalid value for 'occupation'."), nullable=True),
-        "occupation": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'occupation' column.")),
-        
-        "relationship": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["Wife", "Own-child", "Husband", "Not-in-family", "Other-relative", "Unmarried"]), error="Invalid value for 'relationship'."), nullable=True),
-        "relationship": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'relationship' column.")),
-        
-        "race": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["White", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other", "Black"]), error="Invalid value for 'race'."), nullable=True),
-        "race": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'race' column.")),
-        
-        "sex": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(['Female', 'Male']), error="Invalid value for 'sex'."), nullable=True),
-        "sex": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'sex' column.")),
-        
-        "capital-gain": pa.Column(int, nullable=True),
-        "capital-gain": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'capital-gain' column.")),
-        
-        "capital-loss": pa.Column(int, nullable=True),
-        "capital-loss": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'capital-loss' column.")),
-        
-        "hours-per-week": pa.Column(int, pa.Check.between(0, 120), nullable=True),
-        "hours-per-week": pa.Column(int, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'hours-per-week' column.")),
-        
-        "native-country": pa.Column(str, pa.Check(lambda s: s.str.strip().isin(["United-States", "Cambodia", "England", "Puerto-Rico", "Canada", "Germany", "Outlying-US(Guam-USVI-etc)", "India", "Japan", "Greece", "South", "China", "Cuba", "Iran", "Honduras", "Philippines", "Italy", "Poland", "Jamaica", "Vietnam", "Mexico", "Portugal", "Ireland", "France", "Dominican-Republic", "Laos", "Ecuador", "Taiwan", "Haiti", "Columbia", "Hungary", "Guatemala", "Nicaragua", "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands"]), error="Invalid value for 'native-country'."), nullable=True),
-        "native-country": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'native-country' column.")),
-        
-        "income": pa.Column(str, pa.Check(lambda s: s.str.strip().isin([">50K", "<=50K"]), error="Invalid value for 'income'."), nullable=True),
-        "income": pa.Column(str, pa.Check(lambda s: s.isna().mean() <= 0.05, element_wise=False, error="Too many null values in 'income' column."))
-    },
-    checks=[
-        pa.Check(lambda df: ~df.duplicated().any(), error="Duplicate rows found."),
-        pa.Check(lambda df: ~(df.isna().all(axis=1)).any(), error="Empty rows found."),
-    ],
-    drop_invalid_rows=False,
-)
-```
-
-The following cell, will have all the errors found in the validation process removed from the dataframe for following steps in the analysis, as well as populating the "validation_errors.log" file.
-
-```{python}
-# Initialize error cases DataFrame
-error_cases = pd.DataFrame()
-data = data_adult.copy()
-
-# Validate data and handle errors
-try:
-    validated_data = schema.validate(data, lazy=True)
-except pa.errors.SchemaErrors as e:
-    error_cases = e.failure_cases
-
-    # Convert the error message to a JSON string
-    error_message = json.dumps(e.message, indent=2)
-    logging.error("\n" + error_message)
-
-# Filter out invalid rows based on the error cases
-if not error_cases.empty:
-    invalid_indices = error_cases["index"].dropna().unique()
-    validated_data = (
-        data.drop(index=invalid_indices)
-        .reset_index(drop=True)
-        .drop_duplicates()
-        .dropna(how="all")
-    )
-else:
-    validated_data = data
-
-data_adult = validated_data
-
-print("Data Validation 2 passed: Data Validation performed on Dataframe!")
-```
-
-This is the resulting data set following validation. As it can be seen, a few rows were removed from the original data set given that they did not comply with the validation rules defined.
-
-```{python}
-data_adult
-```
+To ensure that the analysis is not influenced by erroneous data, the inputs to this analysis went through exhaustive validation to avoid any influence of low quality data in the results of the analysis. Validation process ensured correct column names, no empty observations, missing data below expected thresholds, correct data types, no duplicate observations, no outlier or anomalous values & ensuring correct category levels.
 
 # EDA Analysis
 ## Data Summary
-Below is the summary of our dataset which contains numerical and categorical variables
 
-```{python}
-data_adult.info()
-```
+In @fig-eda1, @fig-eda2, @fig-eda3, @fig-eda4, @fig-eda5, & @fig-eda6, summary histograms give us a glimpse of our dataset contains numerical and categorical variables describing the features used in the model training.
 
-```{python}
-data_adult.describe()
-```
+![Income Level by Marital Status](../results/figures/eda1.png){#fig-eda1 width=75%}
 
-## Visualization of Dataset
+![Income Level by Relationship Status](../results/figures/eda2.png){#fig-eda2 width=75%}
 
-```{python}
-alt.Chart(data_adult, title = "Income for different marital status").mark_bar(opacity = 0.75).encode(
-    alt.Y('marital-status').title("Marital Status"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+![Income Level by Occupation](../results/figures/eda3.png){#fig-eda3 width=75%}
 
-```{python}
-alt.Chart(data_adult, title = "Income for different relationship").mark_bar(opacity = 0.75).encode(
-    alt.Y('relationship').title("Relationships"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+![Income Level by Workclass](../results/figures/eda4.png){#fig-eda4 width=75%}
 
-```{python}
-alt.Chart(data_adult, title = "Income for different occupation").mark_bar(opacity = 0.75).encode(
-    alt.Y('occupation').title("Occupations"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+![Income Level by Race](../results/figures/eda5.png){#fig-eda5 width=75%}
 
-```{python}
-alt.Chart(data_adult, title = "Income for different workclass").mark_bar(opacity = 0.75).encode(
-    alt.Y('workclass').title("Workclass"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+![Income Level by Sex](../results/figures/eda6.png){#fig-eda6 width=75%}
 
-```{python}
-alt.Chart(data_adult, title = "Income for different race").mark_bar(opacity = 0.75).encode(
-    alt.Y('race').title("Race"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+Note: The process to create the plots above was inspired by (Ostblom, J. INSERT REFERENCE)
 
-```{python}
-alt.Chart(data_adult, title = "Income for different sex").mark_bar(opacity = 0.75).encode(
-    alt.Y('sex').title("Sex"),
-    alt.X('count()').stack(False),
-    alt.Color('income')
-).properties(
-    height=200,
-    width=300
-)
-```
+# Model Development and Evaluation
 
 ## Train/Test Split
 
-The following cell separates the data set into train and test sets for purposes of training the classifier model. 
+In preparation for fitting a KNN model, the data was divided into an 80/20 training/test data split. A random seed was used in the splitting process to ensure reproducibility of the analysis.
 
-It uses an 80/20 data split for training and test.
-
-It also defines the target colums, which will be the income range (Column = income)
-
-```{python}
-train_df, test_df = train_test_split(data_adult, test_size=0.20, random_state=123)
-X_train, y_train = (
-    train_df.drop(columns=['income']),
-    train_df["income"],
-)
-X_test, y_test = (
-    test_df.drop(columns=['income']),
-    test_df["income"],
-)
-```
-
-## Data Validation 3: Target / Response Distribution
-
-The following validation will be performed:
-- Target/response variable follows expected distribution
-
-```{python}
-adult_train_ds = Dataset(train_df, label="income", cat_features=[])
-```
-
-```{python}
-train_df["income"].value_counts()
-```
-
-```{python}
-check_dist = ClassImbalance().add_condition_class_ratio_less_than(0.4).run(adult_train_ds)
-if not check_dist.passed_conditions():
-    raise ValueError("Error message here")
-
-print("Data Validation 3 passed: The target has at least a 40%/60% split!")
-```
-
-## Data Validation 4: Deep Checks Validation
-The following deepchecks validations will be performed:
+## Deep Checks Validation
+The following deepchecks validations were performed to ensure quality of the training data:
 - No anomalous correlations between target/response variable and features/explanatory variables
 - No anomalous correlations between features/explanatory variables
 
-```{python}
-check_feat_label_corr = FeatureLabelCorrelation().add_condition_feature_pps_less_than(0.9)
-check_feat_label_corr_result = check_feat_label_corr.run(dataset = adult_train_ds)
-
-if not check_feat_label_corr_result.passed_conditions():
-    raise ValueError("Feature-Label correlation exceeds the maximum acceptable threshold.")
-
-check_feat_feat_corr = FeatureFeatureCorrelation().add_condition_max_number_of_pairs_above_threshold(0.8, 3)
-check_feat_feat_corr_result = check_feat_feat_corr.run(dataset = adult_train_ds)
-
-if not check_feat_feat_corr_result.passed_conditions():
-    raise ValueError("Feature-Feature correlation exceeds the maximum acceptable threshold.")
-
-print("Data Validation 4 passed: Deep checks validation has been performed successfully!")
-```
-
-## Column Selection
-
-The following cell describes which columns were selected to train the classifier model.
+## Feature Selection
 
 For simplicity, the model is focused on using categorical variables available in the data set.
 
-```{python}
-categorical_features = ["marital-status", "relationship", "occupation", "workclass", "race"]
-binary_features = ["sex"]
-drop_features = ["age", "fnlwgt", "education", "education-num", "capital-gain", "capital-loss", "hours-per-week", "native-country"]
-```
+The used features are the following:
+
+As categorical features: "marital-status", "relationship", "occupation", "workclass", "race".
+As binary features: "sex".
 
 ## Preprocessing
 
-The following cell uses One Hot Encoder to encode categorical features, as well as using a Simple Imputer to deal with missing data in the data set.
-
-Additionally, it creates a Column Transformer describing the treatment that each column will get during the encoding process.
-
-```{python}
-binary_transformer = OneHotEncoder(drop="if_binary", dtype=int)
-
-categorical_transformer = make_pipeline(
-    SimpleImputer(strategy="constant", fill_value="missing"),
-    OneHotEncoder(handle_unknown="ignore", sparse_output=False),
-)
-
-preprocessor = make_column_transformer(   
-    (binary_transformer, binary_features),    
-    (categorical_transformer, categorical_features),
-    ("drop", drop_features),
-)
-```
+The data was preprocessed using One Hot Encoder to encode categorical features, as well as using a Simple Imputer to deal with any missing data in the data set.
 
 ## Model Fit
 
-A pipeline is created that describes the preprocessing and KNN flow that will be used to train the model with "fit". Immediately after, the model's performance score is displayed based on training data.
-
-```{python}
-model = KNeighborsClassifier()
-pipe = make_pipeline(preprocessor, model)
-pipe.fit(X_train, y_train)
-```
-
-```{python}
-pipe.score(X_train, y_train)
-```
+A pipeline was created to describe the preprocessing and KNN modeling steps that were used to train the model.
 
 ## Model Test Score and Prediction
 
 Finally, the model is scored on the unseen examples. 
 
-Additionally, it displays the hard predictions the model does on the test data.
+Additionally, @fig-cm displays the hard predictions the model does on the test data.
 
-```{python}
-test_score = pipe.score(X_test, y_test)
-test_score
-```
+The test score was 0.7842.
 
-## Visualization of the prediction result
+![Confusion Matrix](../results/figures/cm.png){#fig-cm width=75%}
 
-```{python}
-cm = ConfusionMatrixDisplay.from_estimator(
-    pipe,
-    X_test,
-    y_test,
-    values_format="d"
-)
-
-cm
-```
+The process followed for creating the model was inspired by (Kolhatkar, V INSERT REFERENCE) and (Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al INSERT REFERENCE)
 
 # Discussion
 
-The KNN model described in this notebook is able to predict the income of an individual based on the described categorical features with an accuracy of ~80% as seen in the training and test scores. 
+The KNN model described in this report is able to predict the income of an individual based on the described categorical features with an accuracy of ~80% as seen in the training and test scores. 
 
 It was expected that selected categorical features would influence the income range for individuals, particularly those related to occupation and education level. 
 
@@ -443,6 +105,8 @@ These findings support the notion that specific socioeconomic characteristics of
 However, this analysis opens the question on how each individual feature affects the model. Therefore, further deep-dive could better inform if all features have a significant influence on the model's ability to predict accurately. Additional numerical features, such as age and hours-per-week are likely to improve the model training process and could be evaluated as well.
 
 # References
+
+REMOVE THE FOLLOWING LINES ONCE THE REFERENCES ARE SET AND CALLED FROM MARKDOWN
 
 - Becker, B. & Kohavi, R. (1996). Adult [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5XW20.
 - Kolhatkar, V. UBC Master of Data Science program, 2024-25, DSCI 571 Supervised Learning I. 
