@@ -4,6 +4,7 @@ format:
     html:
         toc: true
         toc-depth: 2
+        embed-resources: true
     pdf:
         toc: true
         toc-depth: 2
@@ -86,7 +87,13 @@ Finally, the model is scored on the unseen examples.
 
 Additionally, @fig-cm displays the hard predictions the model does on the test data.
 
-The test score was 0.7842.
+```{python}
+import pandas as pd
+test_score_df = pd.read_csv("../results/figures/test_score.csv")
+test_score = test_score_df.loc[0, 'test_score']
+```
+
+The test score was `{python} test_score`.
 
 ![Confusion Matrix](../results/figures/cm.png){#fig-cm width=75%}
 
