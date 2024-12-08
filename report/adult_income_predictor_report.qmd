@@ -36,6 +36,31 @@ To ensure that the analysis is not influenced by erroneous data, the inputs to t
 
 # EDA Analysis
 ## Data Summary
+In @tbl-despriction, it describes the number of unique categories and the missing values for the relevant categorical variables.
+
+```{python}
+#| label: tbl-despriction
+#| tbl-cap: description table for categorical variables
+import pandas as pd
+from tabulate import tabulate
+
+data_adult = pd.read_csv("../data/processed/cleaned_data.csv")
+categorical_columns = ['marital-status', 'relationship', 'occupation', 'workclass', 'race', 'sex']
+feature_summary = []
+for col in categorical_columns:
+    unique_values = data_adult[col].nunique() 
+    missing_values = data_adult[col].isnull().sum() 
+    missing_percentage = (missing_values / len(data_adult)) * 100  
+    feature_summary.append({
+        'Feature': col,
+        'Type': 'Categorical',
+        'Unique Categories': unique_values,
+        'Missing Values (%)': f"{missing_percentage:.2f}"
+    })
+feature_summary_df = pd.DataFrame(feature_summary)
+# Markdown(feature_summary_df.to_markdown(index = False))
+print(tabulate(feature_summary_df, headers='keys', tablefmt='pipe', showindex=False))
+```
 
 In @fig-eda1, @fig-eda2, @fig-eda3, @fig-eda4, @fig-eda5, & @fig-eda6, summary histograms give us a glimpse of our dataset contains numerical and categorical variables describing the features used in the model training.
 

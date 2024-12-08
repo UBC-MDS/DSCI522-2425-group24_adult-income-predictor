@@ -27,6 +27,28 @@ def main(processed_dir, results_dir):
     # Load the dataset from the specified directory
     data_adult = pd.read_csv(processed_dir)
 
+    # 要描述的分类变量
+    categorical_columns = ['marital-status', 'relationship', 'occupation', 'workclass', 'race', 'sex']
+
+    # 创建特征描述表
+    feature_summary = []
+    for col in categorical_columns:
+        unique_values = data_adult[col].nunique()  # 类别数量
+        missing_values = data_adult[col].isnull().sum()  # 缺失值数量
+        missing_percentage = (missing_values / len(data_adult)) * 100  # 缺失百分比
+        feature_summary.append({
+            'Feature': col,
+            'Type': 'Categorical',
+            'Unique Categories': unique_values,
+            'Missing Values (%)': f"{missing_percentage:.2f}"
+        })
+
+    # 转换为 DataFrame
+    feature_summary_df = pd.DataFrame(feature_summary)
+
+    # 打印结果
+    print(feature_summary_df)
+
     # Generate bar plot for income by marital status
     eda1 = alt.Chart(data_adult, title="Income for different marital status").mark_bar(opacity=0.75).encode(
         alt.Y('marital-status').title("Marital Status"),
