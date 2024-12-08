@@ -46,7 +46,6 @@ In our analysis, we focus on the categorical socioeconomic features within the d
 
 The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), workclass (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
 
-In @fig-eda1, @fig-eda2, @fig-eda3, @fig-eda4, @fig-eda5, & @fig-eda6, summary histograms give us a glimpse of our dataset contains numerical and categorical variables describing the features used in the model training.
 
 ![Income Level by Marital Status](../results/figures/eda1.png){#fig-eda1 width=75%}
 
