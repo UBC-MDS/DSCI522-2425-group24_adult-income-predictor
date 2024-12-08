@@ -18,9 +18,17 @@ execute:
 - Group 24
 - Members: Michael Suriawan, Francisco Ramirez, Tingting Chen, Quanhua Huang
 
+```{python}
+import pandas as pd
+test_score_df = pd.read_csv("../results/figures/test_score.csv")
+test_score = round(test_score_df.loc[0, 'test_score'], 3)
+```
+
 ## Summary
 
+
 This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau by @adult_2, contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately 80%, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. However, the findings are limited by the exclusion of numerical features such as age and hours-per-week, which could provide additional predictive power. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
+
 
 ## Introduction
 
@@ -38,8 +46,10 @@ To ensure that the analysis is not influenced by erroneous data, the inputs to t
 
 # EDA Analysis
 ## Data Summary
+In our analysis, we focus on the categorical socioeconomic features within the dataset. There are eight categorical features in total; however, we have excluded education and native-country from our analysis to minimize potential bias and refine our focus. This decision was made to ensure that the remaining features are more directly relevant to our study objectives.
 
-In @fig-eda1, @fig-eda2, @fig-eda3, @fig-eda4, @fig-eda5, & @fig-eda6, summary histograms give us a glimpse of our dataset contains numerical and categorical variables describing the features used in the model training.
+The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), workclass (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
+
 
 ![Income Level by Marital Status](../results/figures/eda1.png){#fig-eda1 width=75%}
 
@@ -89,11 +99,6 @@ Finally, the model is scored on the unseen examples.
 
 Additionally, @fig-cm displays the hard predictions the model does on the test data.
 
-```{python}
-import pandas as pd
-test_score_df = pd.read_csv("../results/figures/test_score.csv")
-test_score = test_score_df.loc[0, 'test_score']
-```
 
 The test score was `{python} test_score`.
 
