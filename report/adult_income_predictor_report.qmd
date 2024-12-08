@@ -18,6 +18,12 @@ execute:
 - Group 24
 - Members: Michael Suriawan, Francisco Ramirez, Tingting Chen, Quanhua Huang
 
+```{python}
+import pandas as pd
+test_score_df = pd.read_csv("../results/figures/test_score.csv")
+test_score = round(test_score_df.loc[0, 'test_score'], 3)
+```
+
 ## Summary
 
 This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau by @adult_2, contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately `{python} test_score`, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
@@ -90,11 +96,6 @@ Finally, the model is scored on the unseen examples.
 
 Additionally, @fig-cm displays the hard predictions the model does on the test data.
 
-```{python}
-import pandas as pd
-test_score_df = pd.read_csv("../results/figures/test_score.csv")
-test_score = round(test_score_df.loc[0, 'test_score'], 3)
-```
 
 The test score was `{python} test_score`.
 
