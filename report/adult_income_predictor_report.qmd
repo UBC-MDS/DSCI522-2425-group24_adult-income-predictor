@@ -4,10 +4,11 @@ format:
     html:
         toc: true
         toc-depth: 2
+        embed-resources: true
     pdf:
         toc: true
         toc-depth: 2
-#bibliography: references.bib
+bibliography: references.bib
 execute:
     echo: false
 ---
@@ -19,7 +20,7 @@ execute:
 
 ## Summary
 
-This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau (Becker, B. & Kohavi INSERT REFERENCE), contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately 80%, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
+This report presents the application of a K-Nearest Neighbors (KNN) Classifier to predict an individual's annual income based on selected categorical socioeconomic features from the Adult dataset. The dataset, sourced from the 1994 U.S. Census Bureau by @adult_2, contains 48,842 instances and features such as age, education, occupation, and marital status. The model achieved an accuracy of approximately 80%, with a tendency to predict more individuals with incomes below $50K compared to those above. This result emphasizes the importance of socioeconomic factors in determining income levels. Further investigation into individual feature contributions and the inclusion of numerical variables like age and hours-per-week could enhance prediction performance.
 
 ## Introduction
 
@@ -50,7 +51,7 @@ In @fig-eda1, @fig-eda2, @fig-eda3, @fig-eda4, @fig-eda5, & @fig-eda6, summary h
 
 ![Income Level by Sex](../results/figures/eda6.png){#fig-eda6 width=75%}
 
-Note: The process to create the plots above was inspired by (Ostblom, J. INSERT REFERENCE)
+Note: The process to create the plots above was inspired by @dsci531
 
 # Model Development and Evaluation
 
@@ -86,11 +87,17 @@ Finally, the model is scored on the unseen examples.
 
 Additionally, @fig-cm displays the hard predictions the model does on the test data.
 
-The test score was 0.7842.
+```{python}
+import pandas as pd
+test_score_df = pd.read_csv("../results/figures/test_score.csv")
+test_score = test_score_df.loc[0, 'test_score']
+```
+
+The test score was `{python} test_score`.
 
 ![Confusion Matrix](../results/figures/cm.png){#fig-cm width=75%}
 
-The process followed for creating the model was inspired by (Kolhatkar, V INSERT REFERENCE) and (Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al INSERT REFERENCE)
+The process followed for creating the model was inspired by @dsci571 and @JMLR:v12:pedregosa11a
 
 # Discussion
 
@@ -105,11 +112,4 @@ These findings support the notion that specific socioeconomic characteristics of
 However, this analysis opens the question on how each individual feature affects the model. Therefore, further deep-dive could better inform if all features have a significant influence on the model's ability to predict accurately. Additional numerical features, such as age and hours-per-week are likely to improve the model training process and could be evaluated as well.
 
 # References
-
-REMOVE THE FOLLOWING LINES ONCE THE REFERENCES ARE SET AND CALLED FROM MARKDOWN
-
-- Becker, B. & Kohavi, R. (1996). Adult [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5XW20.
-- Kolhatkar, V. UBC Master of Data Science program, 2024-25, DSCI 571 Supervised Learning I. 
-- Ostblom, J. UBC Master of Data Science program, 2024-25, DSCI 573 Feature and Model Selection.
-- Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al. (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, 2825–2830.
 

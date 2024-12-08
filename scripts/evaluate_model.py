@@ -38,12 +38,14 @@ def main(x_dir, y_dir, results_dir, pickle_loc):
     X_test = pd.read_csv(x_dir)  # Features for testing
     y_test = pd.read_csv(y_dir)  # Labels for testing
 
-    # Calculate the model's test score
+    # Calculate the model's test score, and save it to a CSV file
     test_score = model.score(X_test, y_test)
     print(f"The model obtained a final test score of: {test_score}")
+    test_score_file = os.path.join(results_dir, "test_score.csv")
+    pd.DataFrame({'test_score': [test_score]}).to_csv(test_score_file, index=False)
 
     # Generate and save the confusion matrix plot
-    cm = ConfusionMatrixDisplay.from_estimator(
+    ConfusionMatrixDisplay.from_estimator(
         model,
         X_test,
         y_test,
