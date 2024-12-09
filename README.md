@@ -29,7 +29,7 @@ It was sourced from the UCI Machine Learning Repository and can be found [here](
 
 ## Report
 
-The final report can be found [here](notebooks/adult_income_predictor_report.pdf).
+The final report can be found [here](https://ubc-mds.github.io/DSCI522-2425-group24_adult-income-predictor/).
 
 ## Dependencies
 
