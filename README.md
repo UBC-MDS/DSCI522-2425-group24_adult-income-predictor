@@ -66,7 +66,7 @@ See GIF below for more details:
 make clean
 ```
 
-4. To run the analysis in its entirety, 
+5. To run the analysis in its entirety, 
 enter the following command in the terminal in the project root:
 
 ```(bash)
