@@ -1,13 +1,10 @@
 # eda.py
 # Author: Michael Suriawan
 # Date: 2024-12-4
-# Description: This script performs exploratory data analysis (EDA) on a processed dataset and generates bar plots 
-#              showing income distribution based on various categorical variables. The plots are saved to a specified directory.
 
 import click  
-import os
-import altair as alt  
 import pandas as pd 
+import src.generate_bar_chart_and_save as generate_bar_chart_and_save
 
 
 @click.command()
@@ -26,78 +23,16 @@ def main(processed_dir, results_dir):
     """
     # Load the dataset from the specified directory
     data_adult = pd.read_csv(processed_dir)
-
-    # Generate bar plot for income by marital status
-    eda1 = alt.Chart(data_adult, title="Income for different marital status").mark_bar(opacity=0.75).encode(
-        alt.Y('marital-status').title("Marital Status"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Generate bar plot for income by relationship status
-    eda2 = alt.Chart(data_adult, title="Income for different relationship").mark_bar(opacity=0.75).encode(
-        alt.Y('relationship').title("Relationships"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Generate bar plot for income by occupation
-    eda3 = alt.Chart(data_adult, title="Income for different occupation").mark_bar(opacity=0.75).encode(
-        alt.Y('occupation').title("Occupations"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Generate bar plot for income by workclass
-    eda4 = alt.Chart(data_adult, title="Income for different workclass").mark_bar(opacity=0.75).encode(
-        alt.Y('workclass').title("Workclass"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Generate bar plot for income by race
-    eda5 = alt.Chart(data_adult, title="Income for different race").mark_bar(opacity=0.75).encode(
-        alt.Y('race').title("Race"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Generate bar plot for income by sex
-    eda6 = alt.Chart(data_adult, title="Income for different sex").mark_bar(opacity=0.75).encode(
-        alt.Y('sex').title("Sex"),
-        alt.X('count()').stack(False),
-        alt.Color('income')
-    ).properties(
-        height=200,
-        width=300
-    )
-
-    # Create the output directory if it does not exist
-    if not os.path.isdir(results_dir):
-        os.makedirs(results_dir, exist_ok=True)
-
-    # Save each plot to the results directory
-    eda1.save(os.path.join(results_dir, "eda1.png"), scale_factor=2.0)
-    eda2.save(os.path.join(results_dir, "eda2.png"), scale_factor=2.0)
-    eda3.save(os.path.join(results_dir, "eda3.png"), scale_factor=2.0)
-    eda4.save(os.path.join(results_dir, "eda4.png"), scale_factor=2.0)
-    eda5.save(os.path.join(results_dir, "eda5.png"), scale_factor=2.0)
-    eda6.save(os.path.join(results_dir, "eda6.png"), scale_factor=2.0)
+    tup_list = [
+        ("Marital Status", "marital-status", "eda1.png"),
+        ("Relationships", "relationship", "eda2.png"),
+        ("Occupations", "occupation", "eda3.png"),
+        ("Workclass", "workclass", "eda4.png"),
+        ("Race", "race", "eda5.png"),
+        ("Sex", "sex", "eda6.png")
+    ]
+    for y_axis_label, y_axis_name, plot_name in tup_list:
+        generate_bar_chart_and_save(data_adult, y_axis_label, y_axis_name, results_dir, plot_name)
 
     print("EDA successfully performed and plots saved!")
 
