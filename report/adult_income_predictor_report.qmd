@@ -36,34 +36,45 @@ The Adult dataset, originally curated from the 1994 U.S. Census Bureau database,
 
 Understanding the factors influencing income levels is important for addressing socioeconomic disparities, informing policy decisions, and developing targeted programs to support underprivileged groups. This problem is particularly interesting as it highlights how demographic and socioeconomic variables interact and impact an individual's earning potential, offering insights into broader societal trends.
 
-The model described in this notebook, looks to use a trained "Nearest Neighbors" Classifier to use different socioeconomic features to predict the range of the individual's income. The features in the data set include characteristics such as age, education level, marital status, occupation, among others.
+The model described in this notebook looks to use a trained "Nearest Neighbors" Classifier to use different socioeconomic features to predict the range of the individual's income. The features in the data set include characteristics such as age, education level, marital status, occupation, among others.
 
-The model looks to predict whether or not an individual's income exceeds $50K/yr based on the selected categorical socioeconomic features. For simplicity, only selected categorical features from the original data set. These features are specifically encoded based on their content prior to training the kNN classifier used for predictions. 
+The model looks to predict whether an individual's income exceeds $50K/yr based on the selected categorical socioeconomic features. For simplicity, only selected categorical features from the original data set. These features are specifically encoded based on their content prior to training the kNN classifier used for predictions. 
 
 # Data Validation
 
-To ensure that the analysis is not influenced by erroneous data, the inputs to this analysis went through exhaustive validation to avoid any influence of low quality data in the results of the analysis. Validation process ensured correct column names, no empty observations, missing data below expected thresholds, correct data types, no duplicate observations, no outlier or anomalous values & ensuring correct category levels.
+To ensure that the analysis is not influenced by erroneous data, the inputs to this analysis went through exhaustive validation to avoid any influence of low-quality data in the results of the analysis. Validation process ensured correct column names, no empty observations, missing data below expected thresholds, correct data types, no duplicate observations, no outlier or anomalous values & ensuring correct category levels.
 
 # EDA Analysis
 ## Data Summary
-In our analysis, we focus on the categorical socioeconomic features within the dataset. There are eight categorical features in total; however, we have excluded education and native-country from our analysis to minimize potential bias and refine our focus. This decision was made to ensure that the remaining features are more directly relevant to our study objectives.
+In our analysis, we focus on the categorical socioeconomic features within the dataset. There are eight categorical features in total; however, we have excluded education and native country from our analysis to minimize potential bias and refine our focus. This decision was made to ensure that the remaining features are more directly relevant to our study objectives.
 
-The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), workclass (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
-
+The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), work class (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
 
 ![Income Level by Marital Status](../results/figures/eda1.png){#fig-eda1 width=75%}
 
+@fig-eda1 notes that the population with the highest count of >50K earners are married under civil law.
+
 ![Income Level by Relationship Status](../results/figures/eda2.png){#fig-eda2 width=75%}
+
+@fig-eda2 notes that the population with the highest count of >50K earners play a role as husband in their relationships.
 
 ![Income Level by Occupation](../results/figures/eda3.png){#fig-eda3 width=75%}
 
+@fig-eda3 notes that the population with the highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.
+
 ![Income Level by Workclass](../results/figures/eda4.png){#fig-eda4 width=75%}
+
+@fig-eda4 notes that the population with the highest count of >50K earners are in the provate sector.
 
 ![Income Level by Race](../results/figures/eda5.png){#fig-eda5 width=75%}
 
+@fig-eda5 notes that the population with the highest count of >50K earners are primarily white.
+
 ![Income Level by Sex](../results/figures/eda6.png){#fig-eda6 width=75%}
 
-Note: The process to create the plots above was inspired by @dsci531
+@fig-eda6 notes that the population with the highest count of >50K earners are primarily male.
+
+Note: The process to create the plots above was inspired by @dsci531.
 
 # Model Development and Evaluation
 
