@@ -25,14 +25,14 @@ Please add your contribution below by following the template!
 - Author: Michael Suriawan
 - Description: Instead of saving everything in results/figures, we moved the file into its appropriate folder directory.
 
-### Improvement Added descriptions on EDA, Confusion Matrix and Model Selection.
+### Improvement 4: Added descriptions on EDA, Confusion Matrix and Model Selection.
 
 - From: Peer Review Feedback from @stephqwu
 - Pull Request link: [link](ADD_IMPROVEMENT_PULL_REQUEST_LINK_HERE)
 - Author: Francisco Ramirez
 - Description: Included plot interpretation for all EDA plots under plot caption. Included Confusion Matrix takeaways. Included notes on why KNN was selected for this process.
 
-### Improvement Update to CONTRIBUTING.md
+### Improvement 5: Update to CONTRIBUTING.md
 
 - From: Peer Review Feedback from @AbdulSafdar
 - Pull Request link: [link](ADD_IMPROVEMENT_PULL_REQUEST_LINK_HERE)
