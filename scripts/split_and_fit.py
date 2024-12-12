@@ -149,6 +149,10 @@ def main(processed_dir, preprocessed_dir, random_seed, models_dir):
     train_score = pipe.score(X_train, y_train)
     print(f"Training score: {train_score:.4f} obtained")
 
+    # Create the directory if it doesn't exist
+    if not os.path.isdir(models_dir):
+        os.makedirs(models_dir, exist_ok=True)
+        
     # Save the trained pipeline (including preprocessing and model) as a pickle file
     model_path = os.path.join(models_dir, "model.pickle")
     with open(model_path, 'wb') as f:

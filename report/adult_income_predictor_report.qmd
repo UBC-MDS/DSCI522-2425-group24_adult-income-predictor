@@ -20,7 +20,7 @@ execute:
 
 ```{python}
 import pandas as pd
-test_score_df = pd.read_csv("../results/figures/test_score.csv")
+test_score_df = pd.read_csv("../results/table/test_score.csv")
 test_score = round(test_score_df.loc[0, 'test_score'], 3)
 ```
 

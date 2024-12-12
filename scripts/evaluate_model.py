@@ -15,7 +15,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 @click.option('--x_dir', type=str, help="Path to X_test CSV file", required=True)
 @click.option('--y_dir', type=str, help="Path to y_test CSV file", required=True)
 @click.option('--pickle_loc', type=str, help="Path to the pickle file containing the trained model", required=True)
-@click.option('--results_figure_dir=', type=str, help="Path to the directory where the plots will be saved", required=True)
+@click.option('--results_figure_dir', type=str, help="Path to the directory where the plots will be saved", required=True)
 @click.option('--results_table_dir', type=str, help="Path to the directory where the table will be saved", required=True)
 def main(x_dir, y_dir, pickle_loc, results_figure_dir, results_table_dir):
     """
@@ -43,6 +43,11 @@ def main(x_dir, y_dir, pickle_loc, results_figure_dir, results_table_dir):
     # Calculate the model's test score, and save it to a CSV file
     test_score = model.score(X_test, y_test)
     print(f"The model obtained a final test score of: {test_score}")
+
+    # Create the directory if it doesn't exist
+    if not os.path.isdir(results_table_dir):
+        os.makedirs(results_table_dir, exist_ok=True)
+        
     test_score_file = os.path.join(results_table_dir, "test_score.csv")
     pd.DataFrame({'test_score': [test_score]}).to_csv(test_score_file, index=False)
 
