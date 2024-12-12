@@ -1,15 +1,16 @@
 # evaluate_model.py
 # Author: Michael Suriawan
 # Date: 2024-12-4
-# Description: This script evaluates a machine learning model using test data and generates a confusion matrix plot.
 
+import sys
 import os
 import click
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
-
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
 
 @click.command()
 @click.option('--x_dir', type=str, help="Path to X_test CSV file", required=True)
@@ -43,12 +44,8 @@ def main(x_dir, y_dir, pickle_loc, results_figure_dir, results_table_dir):
     # Calculate the model's test score, and save it to a CSV file
     test_score = model.score(X_test, y_test)
     print(f"The model obtained a final test score of: {test_score}")
-
-    # Create the directory if it doesn't exist
-    if not os.path.isdir(results_table_dir):
-        os.makedirs(results_table_dir, exist_ok=True)
         
-    test_score_file = os.path.join(results_table_dir, "test_score.csv")
+    test_score_file = create_dir_and_file_if_not_exist(results_table_dir, "test_score.csv")
     pd.DataFrame({'test_score': [test_score]}).to_csv(test_score_file, index=False)
 
     # Generate and save the confusion matrix plot
@@ -60,7 +57,7 @@ def main(x_dir, y_dir, pickle_loc, results_figure_dir, results_table_dir):
     )
 
     # Save the confusion matrix plot to the results directory
-    cm_path = os.path.join(results_figure_dir, "cm.png")
+    cm_path = create_dir_and_file_if_not_exist(results_figure_dir, "cm.png")
     plt.savefig(cm_path, dpi=300, bbox_inches='tight')
     plt.close()  
 

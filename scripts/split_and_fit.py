@@ -1,11 +1,8 @@
 # split_and_fit.py
 # author: Michael Suriawan
 # date: 2024-12-04
-# description: This script processes a dataset by performing data validation, preprocessing, 
-#              training a K-Nearest Neighbors classifier, and saving the trained model. 
-#              It includes data integrity checks using Deepchecks and handles categorical 
-#              and binary features appropriately.
 
+import sys
 import os
 import click
 import pandas as pd
@@ -20,6 +17,8 @@ from deepchecks.tabular import Dataset
 from deepchecks.tabular.checks import FeatureLabelCorrelation
 from deepchecks.tabular.checks.data_integrity import FeatureFeatureCorrelation
 from deepchecks.tabular.checks import ClassImbalance
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
 
 
 @click.command()
@@ -35,10 +34,12 @@ def main(processed_dir, preprocessed_dir, random_seed, models_dir):
     -----------
     processed_dir : str
         Path to the processed training data in CSV format.
-    results_dir : str
-        Path to the directory where the trained model and any results will be saved.
+    preprocessed_dir : str
+        Path to save split data.
     random_seed : int
         Selected seed for test data split
+    models_dir : str
+        Path to the directory where the trained model and any results will be saved.
 
     Workflow:
     ---------
@@ -68,10 +69,10 @@ def main(processed_dir, preprocessed_dir, random_seed, models_dir):
         test_df["income"],
     )
 
-    X_test_file = os.path.join(preprocessed_dir, "X_test.csv")
+    X_test_file = create_dir_and_file_if_not_exist(preprocessed_dir,"X_test.csv")
     X_test.to_csv(X_test_file, index=False)
 
-    y_test_file = os.path.join(preprocessed_dir, "y_test.csv")
+    y_test_file = create_dir_and_file_if_not_exist(preprocessed_dir, "y_test.csv")
     y_test.to_csv(y_test_file, index=False)
 
     print(f"Split data into train (shape: {X_train.shape}) and test (shape: {X_test.shape}) sets")
@@ -149,12 +150,8 @@ def main(processed_dir, preprocessed_dir, random_seed, models_dir):
     train_score = pipe.score(X_train, y_train)
     print(f"Training score: {train_score:.4f} obtained")
 
-    # Create the directory if it doesn't exist
-    if not os.path.isdir(models_dir):
-        os.makedirs(models_dir, exist_ok=True)
-        
     # Save the trained pipeline (including preprocessing and model) as a pickle file
-    model_path = os.path.join(models_dir, "model.pickle")
+    model_path = create_dir_and_file_if_not_exist(models_dir, "model.pickle")
     with open(model_path, 'wb') as f:
         pickle.dump(pipe, f)
     print(f"Successfully saved the trained model to {model_path}")
