@@ -1,6 +1,6 @@
 services:
   adult-income-predictor:
-    image: michaelsuriawan/dsci522-2425-group24_adult-income-predictor
+    image: michaelsuriawan/dsci522-2425-group24_adult-income-predictor:9c6ada0
     ports:
       - "8888:8888" 
     volumes:
