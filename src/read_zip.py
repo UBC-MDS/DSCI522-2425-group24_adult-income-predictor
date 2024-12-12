@@ -1,8 +1,7 @@
 import os
 import requests
 import zipfile
-import src.create_dir_and_file_if_not_exist as create_dir_and_file_if_not_exist
-
+from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
 
 def read_zip(url, directory):
     """

@@ -2,9 +2,12 @@
 # Author: Michael Suriawan
 # Date: 2024-12-4
 
+import sys
+import os
 import click  
-import pandas as pd 
-import src.generate_bar_chart_and_save as generate_bar_chart_and_save
+import pandas as pd
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.generate_bar_chart_and_save import generate_bar_chart_and_save
 
 
 @click.command()

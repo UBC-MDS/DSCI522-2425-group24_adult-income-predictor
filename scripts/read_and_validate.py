@@ -2,13 +2,15 @@
 # author: Michael Suriawan
 # date: 2024-12-4
 
+import sys
 import os
 import click
 import pandas as pd
 import pandera as pa
-import src.create_dir_and_file_if_not_exist as create_dir_and_file_if_not_exist
-import src.validate_df as validate_df
-import src.validate_raw_file as validate_raw_file
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
+from src.validate_df import validate_df
+from src.validate_raw_file import validate_raw_file
 
 
 @click.command()

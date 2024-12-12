@@ -2,8 +2,11 @@
 # author: Michael Suriawan
 # date: 2024-12-4
 
+import sys
+import os
 import click
-import src.read_zip as read_zip
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.read_zip import read_zip
 
 @click.command()
 @click.option('--url', type=str, required=True, help="URL of the dataset to be downloaded (must be a ZIP file).")

@@ -2,7 +2,7 @@ import logging
 import json
 import pandas as pd
 import pandera as pa
-import create_dir_and_file_if_not_exist
+from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
 
 
 def validate_df(adult_income_dataframe):
