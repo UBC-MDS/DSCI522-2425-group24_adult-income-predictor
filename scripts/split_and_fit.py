@@ -25,9 +25,9 @@ from deepchecks.tabular.checks import ClassImbalance
 @click.command()
 @click.option('--processed_dir', type=str, help="Path to processed training data (CSV file)", required=True)
 @click.option('--preprocessed_dir', type=str, help="Path to save split data", required=True)
-@click.option('--results_dir', type=str, help="Path to the directory where the plots will be saved", required=True)
 @click.option('--random_seed', type=int, help="Random seed that will be used in data split", required=True)
-def main(processed_dir, preprocessed_dir, results_dir, random_seed):
+@click.option('--models_dir', type=str, help="Path to the directory where the model will be saved", required=True)
+def main(processed_dir, preprocessed_dir, random_seed, models_dir):
     """
     Main function to process data, validate it, train a KNN classifier, and save the trained model.
 
@@ -149,8 +149,12 @@ def main(processed_dir, preprocessed_dir, results_dir, random_seed):
     train_score = pipe.score(X_train, y_train)
     print(f"Training score: {train_score:.4f} obtained")
 
+    # Create the directory if it doesn't exist
+    if not os.path.isdir(models_dir):
+        os.makedirs(models_dir, exist_ok=True)
+        
     # Save the trained pipeline (including preprocessing and model) as a pickle file
-    model_path = os.path.join(results_dir, "model.pickle")
+    model_path = os.path.join(models_dir, "model.pickle")
     with open(model_path, 'wb') as f:
         pickle.dump(pipe, f)
     print(f"Successfully saved the trained model to {model_path}")
