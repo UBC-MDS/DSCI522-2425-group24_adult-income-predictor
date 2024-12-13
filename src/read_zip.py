@@ -3,6 +3,7 @@ import requests
 import zipfile
 from src.create_dir_and_file_if_not_exist import create_dir_and_file_if_not_exist
 
+
 def read_zip(url, directory):
     """
     Read a zip file from the given URL and extract its contents to the specified directory.
