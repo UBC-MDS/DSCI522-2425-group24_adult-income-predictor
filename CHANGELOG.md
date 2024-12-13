@@ -39,9 +39,9 @@ Please add your contribution below by following the template!
 - Author: Francisco Ramirez
 - Description: Included an explicit section to "Get Support"
 
-### Improvement ADD_IMPROVEMENT_ID_HERE: ADD_IMPROVEMENT_TITLE_HERE
+### Improvement 6: Add detailed description in Abstract and Summary
 
-- From: ADD_IMPROVEMENT_SOURCE_HERE
-- Pull Request link: [link](ADD_IMPROVEMENT_PULL_REQUEST_LINK_HERE)
-- Author: ADD_YOUR_NAME_HERE
-- Description: ADD_DESCRIPTION_OF_YOUR_FIXES_HERE
+- From: Milestone 1 Feedback
+- Pull Request link: https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/pull/33
+- Author: Quanhua Huang
+- Description: Add more explanation in the abstract and summary part to better introduce our topic, providing more background information and how we analysis the data.
