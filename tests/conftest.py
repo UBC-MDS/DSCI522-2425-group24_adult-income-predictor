@@ -9,8 +9,15 @@ import shutil
 def cleanup_directories_at_end_of_session():
     # This code will run at the end of the pytest session
     yield
+
+    dirs = [
+        'tests/test_zip_data1',
+        'tests/test_zip_data2',
+        'tests/folder_1',
+    ]
+
     # Code to delete directories goes here
-    for directory in ['tests/test_zip_data1', 'tests/test_zip_data2']:
+    for directory in dirs:
         try:
             shutil.rmtree(directory)
         except FileNotFoundError:
