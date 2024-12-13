@@ -53,4 +53,4 @@ def test_invalid_url(mock_response):
 # Test 3: Non-zip URL should raise a ValueError
 def test_non_zip_url():
     with pytest.raises(ValueError, match='The URL provided does not point to a ZIP file.'):
-        read_zip(mock_url, test_dir_1)
+        read_zip(url_3, test_dir_1)
