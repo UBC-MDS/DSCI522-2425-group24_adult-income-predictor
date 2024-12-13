@@ -28,14 +28,14 @@ Please add your contribution below by following the template!
 ### Improvement 4: Added descriptions on EDA, Confusion Matrix and Model Selection.
 
 - From: Peer Review Feedback from @stephqwu
-- Pull Request link: [link](ADD_IMPROVEMENT_PULL_REQUEST_LINK_HERE)
+- Pull Request link: [link](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/pull/48)
 - Author: Francisco Ramirez
 - Description: Included plot interpretation for all EDA plots under plot caption. Included Confusion Matrix takeaways. Included notes on why KNN was selected for this process.
 
 ### Improvement 5: Update to CONTRIBUTING.md
 
 - From: Peer Review Feedback from @AbdulSafdar
-- Pull Request link: [link](ADD_IMPROVEMENT_PULL_REQUEST_LINK_HERE)
+- Pull Request link: [link](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/pull/48)
 - Author: Francisco Ramirez
 - Description: Included an explicit section to "Get Support"
 
