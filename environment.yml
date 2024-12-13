@@ -20,6 +20,4 @@ dependencies:
   - make=4.4.1
   - pytest=8.3.4
   - responses=0.24.1
-  - pip:
-    - deepchecks==0.18.1
      
