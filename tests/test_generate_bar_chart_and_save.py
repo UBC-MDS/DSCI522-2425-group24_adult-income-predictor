@@ -14,10 +14,10 @@ import pandas as pd
 test_dir= 'tests/folder_plot'
 plot_1 = 'plot_1.png'
 
-test_df = pd.DataFrame{
+test_df = pd.DataFrame({
     'age': ['10', '20', '27', '56', '33', '20', '27'],
     'marital-status': ['Divorced', 'Divorced', 'Separated', 'Widowed', 'Separated', 'Divorced', 'Widowed']
-}
+})
 # TESTS
 
 def test_plot_exist():
@@ -25,7 +25,7 @@ def test_plot_exist():
     'age', 
     'Age',
     test_dir, 
-    plot_1))
+    plot_1)
     file_path = os.path.join('tests/folder_plot', plot_1)
     assert os.path.exists(file_path), f"Plot was not saved at {file_path}"
     assert os.path.getsize(file_path) > 0, f"The saved plot exist but is empty at {file_path}"
