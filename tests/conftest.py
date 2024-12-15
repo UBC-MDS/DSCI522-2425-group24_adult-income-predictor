@@ -14,6 +14,7 @@ def cleanup_directories_at_end_of_session():
         'tests/test_zip_data1',
         'tests/test_zip_data2',
         'tests/folder_1',
+        'tests/folder_plot'
     ]
 
     # Code to delete directories goes here
