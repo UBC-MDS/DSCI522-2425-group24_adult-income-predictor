@@ -58,6 +58,7 @@ def main(x_dir, y_dir, pickle_loc, results_figure_dir, results_table_dir):
 
     # Save the confusion matrix plot to the results directory
     cm_path = create_dir_and_file_if_not_exist(results_figure_dir, "cm.png")
+    plt.title('Confusion Matrix for Income Prediction KNN Model', fontsize=16)
     plt.savefig(cm_path, dpi=300, bbox_inches='tight')
     plt.close()  
 

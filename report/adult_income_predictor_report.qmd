@@ -52,15 +52,21 @@ The exploratory data analysis (EDA) begins with histograms of the six selected c
 
 ![Income Level by Marital Status - Highest count of >50K earners are married under civil law.](../results/figures/eda1.png){#fig-eda1 width=85%}
 
+
 ![Income Level by Relationship Status - Highest count of >50K earners have a role as husbands in their relationships.](../results/figures/eda2.png){#fig-eda2 width=85%}
+
 
 ![Income Level by Occupation - Highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.](../results/figures/eda3.png){#fig-eda3 width=85%}
 
+
 ![Income Level by Workclass - Highest count of >50K earners are in the private sector.](../results/figures/eda4.png){#fig-eda4 width=85%}
+
 
 ![Income Level by Race - Highest count of >50K earners are primarily white.](../results/figures/eda5.png){#fig-eda5 width=85%}
 
+
 ![Income Level by Sex - Highest count of >50K earners are primarily male.](../results/figures/eda6.png){#fig-eda6 width=75%}
+
 
 Note: The process to create the plots above was inspired by @dsci531.
 
