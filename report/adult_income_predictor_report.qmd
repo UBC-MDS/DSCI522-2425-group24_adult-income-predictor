@@ -50,15 +50,15 @@ In our analysis, we focus on the categorical socioeconomic features within the d
 
 The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), work class (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
 
-![Income Level by Marital Status - Highest count of >50K earners are married under civil law.](../results/figures/eda1.png){#fig-eda1 width=75%}
+![Income Level by Marital Status - Highest count of >50K earners are married under civil law.](../results/figures/eda1.png){#fig-eda1 width=85%}
 
-![Income Level by Relationship Status - Highest count of >50K earners have a role as husbands in their relationships.](../results/figures/eda2.png){#fig-eda2 width=75%}
+![Income Level by Relationship Status - Highest count of >50K earners have a role as husbands in their relationships.](../results/figures/eda2.png){#fig-eda2 width=85%}
 
-![Income Level by Occupation - Highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.](../results/figures/eda3.png){#fig-eda3 width=75%}
+![Income Level by Occupation - Highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.](../results/figures/eda3.png){#fig-eda3 width=85%}
 
-![Income Level by Workclass - Highest count of >50K earners are in the private sector.](../results/figures/eda4.png){#fig-eda4 width=75%}
+![Income Level by Workclass - Highest count of >50K earners are in the private sector.](../results/figures/eda4.png){#fig-eda4 width=85%}
 
-![Income Level by Race - Highest count of >50K earners are primarily white.](../results/figures/eda5.png){#fig-eda5 width=75%}
+![Income Level by Race - Highest count of >50K earners are primarily white.](../results/figures/eda5.png){#fig-eda5 width=85%}
 
 ![Income Level by Sex - Highest count of >50K earners are primarily male.](../results/figures/eda6.png){#fig-eda6 width=75%}
 

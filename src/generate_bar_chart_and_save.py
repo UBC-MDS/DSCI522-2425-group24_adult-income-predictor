@@ -27,14 +27,14 @@ def generate_bar_chart_and_save(
         name of your plot. 
     """
 
-    plot = alt.Chart(adult_data_frame, title=f"Income for different {y_axis_label}").mark_bar(opacity=0.75).encode(
+    plot = alt.Chart(adult_data_frame, title=f"Income Distribution by: {y_axis_label}").mark_bar(opacity=0.75).encode(
         alt.Y(y_axis_name).title(y_axis_label),
-        alt.X('count()').stack(False),
-        alt.Color('income')
+        alt.X('count():Q'),
+        alt.Color('income', title='Income'),
+        alt.Column('income', title='Income')
     ).properties(
         height=200,
         width=300
     )
-
     dir = create_dir_and_file_if_not_exist(plot_dir, plot_name)
     plot.save(dir, scale_factor=2.0)
