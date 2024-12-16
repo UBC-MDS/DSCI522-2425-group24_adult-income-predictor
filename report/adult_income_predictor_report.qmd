@@ -158,15 +158,13 @@ The process followed for creating the model was inspired by @dsci571 and @JMLR:v
 
 # Discussion
 
-The KNN model described in this report is able to predict the income of an individual based on the described categorical features with an accuracy of ~80% as seen in the training and test scores. 
+The KNN model presented in this report predicts an individual's income based on categorical features with an accuracy of approximately 80%, as reflected in both the training and test scores. The selected categorical features, particularly those related to occupation and education level, were expected to have a significant influence on income predictions.
 
-It was expected that selected categorical features would influence the income range for individuals, particularly those related to occupation and education level. 
+W also observed that the model tends to predict a higher proportion of individuals earning less than $50K and fewer individuals earning more than $50K compared to the actual distribution. This suggests that while the model captures some trends, it may have a bias toward predicting lower income levels.
 
-With above histograms, we notice that our KNN model predicts more individuals to have income that is less than 50K and predict less individuals to have more than 50K income, comparint to the actual results.
+These findings highlight the impact of socioeconomic characteristics on income levels, reaffirming that factors such as occupation and education are key indicators.
 
-These findings support the notion that specific socioeconomic characteristics of individuals have a direct influence on the individual's income level.
-
-However, this analysis opens the question on how each individual feature affects the model. Therefore, further deep-dive could better inform if all features have a significant influence on the model's ability to predict accurately. Additional numerical features, such as age and hours-per-week are likely to improve the model training process and could be evaluated as well.
+However, this analysis raises questions about the individual contributions of each feature to the model’s performance. A deeper examination could help determine whether all selected features are equally significant in predicting income. Additionally, incorporating numerical features like age and hours-per-week could further enhance the model's predictive power and should be explored in future evaluations.
 
 # References
 
