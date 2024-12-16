@@ -95,6 +95,7 @@ Note: The process to create the plots above was inspired by @dsci531.
 ---
 The EDA of these six categorical features has provided valuable insights into how each feature relates to income. Marital status, occupation, and sex appear to have the most significant influence on income, with clear differences in income distribution between categories. Features like relationship, workclass, and race also demonstrate notable trends that may contribute to income disparities. These findings suggest that these categorical variables, in combination with other features, are important predictors for income classification tasks and should be considered when building predictive models.
 
+
 # Model Development and Evaluation
 
 ## Train/Test Split
@@ -110,12 +111,12 @@ As mentioned in the data validation part above, our following deepchecks validat
 
 ## Feature Selection
 
-For simplicity, the model is focused on using categorical variables available in the data set.
+We chose categorical variables for the model because they provide clear, interpretable groupings that can reveal patterns or trends related to the target variable, such as income. These features allow us to understand how different categories or groups contribute to the outcome, which is especially important for tasks like classification. Additionally, categorical variables are often highly relevant in socio-economic data, where factors like marital status, occupation, and race can significantly influence income.
 
-The used features are the following:
+The features selected for the model are as follows:
 
-As categorical features: "marital-status", "relationship", "occupation", "workclass", "race".
-As binary features: "sex".
+- **Categorical features**: "marital-status", "relationship", "occupation", "workclass", "race"
+- **Binary feature**: "sex"
 
 ## Preprocessing
 
