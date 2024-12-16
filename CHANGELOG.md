@@ -94,3 +94,32 @@ Please add your contribution below by following the template!
 - Pull Request link: [link](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/pull/35#issue-2725434171)
 - Author: Tingting Chen
 - Description: Improve the clarity and structure of the Summary and Introduction sections
+
+### Improvement 14: Update to EDA plots
+
+- From: Peer review from Jinxiong You
+- Pull Request link: 
+- Author: Quanhua Huang
+- Description: Adjust the EDA plots to better reflect the variables, add more explanation in each such as in data validation
+
+### Improvement 15: Update to EDA plots summary
+
+- From: Peer review from Stephanie Wu
+- Pull Request link: 
+- Author: Quanhua Huang
+- Description: Add EDA plots summary and format the EDA plots
+
+### Improvement 16: Update to Analysis and Discussion parts
+
+- From: Peer review from Abdul Safdar
+- Pull Request link: 
+- Author: Quanhua Huang
+- Description: Add more discussion and limitations reasoning, add title in confusion matrix,
+                              discuss the class imbalance, discuss why we choose KNN and compare it with other models
+
+### Improvement 17: Update to Analysis and Discussion parts
+
+- From: Peer review from Yuhan Fan
+- Pull Request link: 
+- Author: Quanhua Huang
+- Description: Separate different income in the EDA plots for better comparisons.
