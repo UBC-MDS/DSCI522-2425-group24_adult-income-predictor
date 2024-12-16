@@ -87,3 +87,10 @@ Please add your contribution below by following the template!
 - Pull Request link: https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/commit/d91b8e38b1aa7ab206a1e39aedf31a4d427c92a5
 - Author: Michael Suriawan
 - Description: Added platform key value tag
+
+### Improvement 13: Update to Summary and Introduction
+
+- From: Milestone 1 Feedback
+- Pull Request link: [link](https://github.com/UBC-MDS/DSCI522-2425-group24_adult-income-predictor/pull/35#issue-2725434171)
+- Author: Tingting Chen
+- Description: Improve the clarity and structure of the Summary and Introduction sections
