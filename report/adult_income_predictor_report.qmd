@@ -72,7 +72,9 @@ In preparation for fitting a KNN model, the data was divided into an 80/20 train
 
 ## Deep Checks Validation
 The following deepchecks validations were performed to ensure quality of the training data:
+
 - No anomalous correlations between target/response variable and features/explanatory variables
+
 - No anomalous correlations between features/explanatory variables
 
 ## Feature Selection
@@ -92,7 +94,18 @@ The data was preprocessed using One Hot Encoder to encode categorical features, 
 
 A pipeline was created to describe the preprocessing and KNN modeling steps that were used to train the model.
 
-K-Nearest Neighbors (KNN) Classifier was selected to be used in this process given its simplicity, under the consideration that this effort is an exploratory exercise on Machine Learning methods applied to this dataset. Other models, as well as hyperparameter optimization could be evaluated to improve modeling scores.
+We chose K-Nearest Neighbors (KNN) for analyzing the income prediction task because of its simplicity, flexibility, and effectiveness in handling non-linear relationships in the data. KNN is an intuitive, non-parametric model that makes predictions based on the closest neighbors of a data point, which allows it to adapt well to complex and non-linear patterns without assuming any specific distribution of the data. Unlike linear models such as logistic regression, which assume a linear relationship between features and the target variable, KNN does not impose such constraints, making it more suitable for datasets where the relationship between variables is more complex.
+
+One of the main advantages of KNN is its minimal preprocessing requirements. Unlike many other models that require significant data transformation, such as feature scaling or normalization, KNN performs well with raw data as long as the features are comparable in scale, where we already applied StandardScaler in preprocessing. Additionally, KNN can be very effective with smaller to medium-sized datasets, which is often the case when dealing with real-world classification tasks. It also performs well in multi-class classification problems, such as predicting income levels, where the goal is to classify a data point into one of several categories (e.g., <=50K or >50K).
+
+Another significant reason for choosing KNN is its interpretability. KNN provides a simple explanation for its predictions—by showing which data points are most similar to the one being classified. This makes it easy to communicate the reasoning behind each prediction to stakeholders. Unlike more complex models like decision trees or neural networks, KNN doesn't rely on intricate structures, and its decision-making process is intuitive. It is also less prone to overfitting compared to highly complex models, as it doesn’t require learning a complicated set of parameters but instead depends on local patterns within the data.
+
+While other methods, such as logistic regression, support vector machines, and decision trees, could have been used, they come with certain limitations. For instance, logistic regression assumes a linear relationship between features and outcomes, which is often not the case in complex datasets like income prediction in our project. Decision trees can easily overfit, especially if the tree is too deep or not pruned correctly. Support vector machines require careful parameter tuning and may struggle with larger datasets. In contrast, KNN provides a straightforward, flexible, and interpretable approach that works well for the income classification task at hand, particularly given the non-linear and diverse nature of the relationships in the dataset.
+
+In summary, KNN was selected for this task because it provides a simple, effective, and interpretable model that adapts to the non-linear structure of the income prediction problem without the need for complex preprocessing or parameter tuning. It is particularly useful when the data is small to medium-sized, and the goal is to quickly and accurately classify data based on local patterns.
+
+
+
 
 ## Model Test Score and Prediction
 
