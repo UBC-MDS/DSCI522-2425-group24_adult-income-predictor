@@ -42,7 +42,25 @@ The model looks to predict whether an individual's income exceeds $50K/yr based 
 
 # Data Validation
 
-To ensure that the analysis is not influenced by erroneous data, the inputs to this analysis went through exhaustive validation to avoid any influence of low-quality data in the results of the analysis. Validation process ensured correct column names, no empty observations, missing data below expected thresholds, correct data types, no duplicate observations, no outlier or anomalous values & ensuring correct category levels.
+To ensure that the analysis was based on high-quality, accurate data, a comprehensive validation process was carried out on the input data. The key steps in the validation process were:
+
+- **File Existence and Format**: The existence and correct format of the input file `data/processed/cleaned_data.csv` were verified successfully, ensuring that the data was ready for processing.
+  
+- **Dataframe Validation**: The dataframe was checked for structural integrity, ensuring that:
+  - All columns were correctly named.
+  - There were no empty observations.
+  - Missing data was below the expected thresholds.
+  - Data types were correctly assigned to each feature.
+  - There were no duplicate records or anomalies.
+  - Categorical features contained the expected category levels.
+
+- **Target Variable Validation**: The distribution of the target variable (`income`) was checked, confirming a balanced 40/60 split between the `<=50K` and `>50K` classes. This validated that the target had a sufficiently representative distribution to avoid class imbalance issues.
+
+- **Deepchecks Validation**: A deep validation check was performed using the Deepchecks library, which passed successfully, confirming that all the data integrity checks were met without any significant issues.
+
+After the validation process, the cleaned data was saved to `data/processed/cleaned_data.csv`, ensuring that it was ready for further analysis and modeling. The validated data was then split into training and testing datasets, ready for model training and evaluation.
+
+This thorough validation process helped ensure that the data used for analysis was of high quality, minimizing the risk of erroneous data affecting the results.
 
 # EDA Analysis
 ## Data Summary
@@ -50,19 +68,33 @@ In our analysis, we focus on the categorical socioeconomic features within the d
 
 The exploratory data analysis (EDA) begins with histograms of the six selected categorical features: marital-status (@fig-eda1), relationship (@fig-eda2), occupation (@fig-eda3), work class (@fig-eda4), race (@fig-eda5), and sex (@fig-eda6). These histograms provide a clear view of the distribution of each feature and offer valuable insights into the balance and variability within the dataset, informing the subsequent modeling and analysis phases.
 
-![Income Level by Marital Status - Highest count of >50K earners are married under civil law.](../results/figures/eda1.png){#fig-eda1 width=75%}
+![Income Level by Marital Status - Highest count of >50K earners are married under civil law.](../results/figures/eda1.png){#fig-eda1 width=85%}
 
-![Income Level by Relationship Status - Highest count of >50K earners have a role as husbands in their relationships.](../results/figures/eda2.png){#fig-eda2 width=75%}
+---
 
-![Income Level by Occupation - Highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.](../results/figures/eda3.png){#fig-eda3 width=75%}
+![Income Level by Relationship Status - Highest count of >50K earners have a role as husbands in their relationships.](../results/figures/eda2.png){#fig-eda2 width=85%}
 
-![Income Level by Workclass - Highest count of >50K earners are in the private sector.](../results/figures/eda4.png){#fig-eda4 width=75%}
+---
 
-![Income Level by Race - Highest count of >50K earners are primarily white.](../results/figures/eda5.png){#fig-eda5 width=75%}
+![Income Level by Occupation - Highest count of >50K earners have executive or managerial positions in their occupations or have a specialty in their professional field.](../results/figures/eda3.png){#fig-eda3 width=85%}
+
+---
+
+![Income Level by Workclass - Highest count of >50K earners are in the private sector.](../results/figures/eda4.png){#fig-eda4 width=85%}
+
+---
+
+![Income Level by Race - Highest count of >50K earners are primarily white.](../results/figures/eda5.png){#fig-eda5 width=85%}
+
+---
 
 ![Income Level by Sex - Highest count of >50K earners are primarily male.](../results/figures/eda6.png){#fig-eda6 width=75%}
 
+
 Note: The process to create the plots above was inspired by @dsci531.
+---
+The EDA of these six categorical features has provided valuable insights into how each feature relates to income. Marital status, occupation, and sex appear to have the most significant influence on income, with clear differences in income distribution between categories. Features like relationship, workclass, and race also demonstrate notable trends that may contribute to income disparities. These findings suggest that these categorical variables, in combination with other features, are important predictors for income classification tasks and should be considered when building predictive models.
+
 
 # Model Development and Evaluation
 
@@ -71,18 +103,20 @@ Note: The process to create the plots above was inspired by @dsci531.
 In preparation for fitting a KNN model, the data was divided into an 80/20 training/test data split. A random seed was used in the splitting process to ensure reproducibility of the analysis.
 
 ## Deep Checks Validation
-The following deepchecks validations were performed to ensure quality of the training data:
+As mentioned in the data validation part above, our following deepchecks validations were performed to ensure quality of the training data:
+
 - No anomalous correlations between target/response variable and features/explanatory variables
+
 - No anomalous correlations between features/explanatory variables
 
 ## Feature Selection
 
-For simplicity, the model is focused on using categorical variables available in the data set.
+We chose categorical variables for the model because they provide clear, interpretable groupings that can reveal patterns or trends related to the target variable, such as income. These features allow us to understand how different categories or groups contribute to the outcome, which is especially important for tasks like classification. Additionally, categorical variables are often highly relevant in socio-economic data, where factors like marital status, occupation, and race can significantly influence income.
 
-The used features are the following:
+The features selected for the model are as follows:
 
-As categorical features: "marital-status", "relationship", "occupation", "workclass", "race".
-As binary features: "sex".
+- **Categorical features**: "marital-status", "relationship", "occupation", "workclass", "race"
+- **Binary feature**: "sex"
 
 ## Preprocessing
 
@@ -92,7 +126,18 @@ The data was preprocessed using One Hot Encoder to encode categorical features, 
 
 A pipeline was created to describe the preprocessing and KNN modeling steps that were used to train the model.
 
-K-Nearest Neighbors (KNN) Classifier was selected to be used in this process given its simplicity, under the consideration that this effort is an exploratory exercise on Machine Learning methods applied to this dataset. Other models, as well as hyperparameter optimization could be evaluated to improve modeling scores.
+We chose K-Nearest Neighbors (KNN) for analyzing the income prediction task because of its simplicity, flexibility, and effectiveness in handling non-linear relationships in the data. KNN is an intuitive, non-parametric model that makes predictions based on the closest neighbors of a data point, which allows it to adapt well to complex and non-linear patterns without assuming any specific distribution of the data. Unlike linear models such as logistic regression, which assume a linear relationship between features and the target variable, KNN does not impose such constraints, making it more suitable for datasets where the relationship between variables is more complex.
+
+One of the main advantages of KNN is its minimal preprocessing requirements. Unlike many other models that require significant data transformation, such as feature scaling or normalization, KNN performs well with raw data as long as the features are comparable in scale, where we already applied StandardScaler in preprocessing. Additionally, KNN can be very effective with smaller to medium-sized datasets, which is often the case when dealing with real-world classification tasks. It also performs well in multi-class classification problems, such as predicting income levels, where the goal is to classify a data point into one of several categories (e.g., <=50K or >50K).
+
+Another significant reason for choosing KNN is its interpretability. KNN provides a simple explanation for its predictions—by showing which data points are most similar to the one being classified. This makes it easy to communicate the reasoning behind each prediction to stakeholders. Unlike more complex models like decision trees or neural networks, KNN doesn't rely on intricate structures, and its decision-making process is intuitive. It is also less prone to overfitting compared to highly complex models, as it doesn’t require learning a complicated set of parameters but instead depends on local patterns within the data.
+
+While other methods, such as logistic regression, support vector machines, and decision trees, could have been used, they come with certain limitations. For instance, logistic regression assumes a linear relationship between features and outcomes, which is often not the case in complex datasets like income prediction in our project. Decision trees can easily overfit, especially if the tree is too deep or not pruned correctly. Support vector machines require careful parameter tuning and may struggle with larger datasets. In contrast, KNN provides a straightforward, flexible, and interpretable approach that works well for the income classification task at hand, particularly given the non-linear and diverse nature of the relationships in the dataset.
+
+In summary, KNN was selected for this task because it provides a simple, effective, and interpretable model that adapts to the non-linear structure of the income prediction problem without the need for complex preprocessing or parameter tuning. It is particularly useful when the data is small to medium-sized, and the goal is to quickly and accurately classify data based on local patterns.
+
+
+
 
 ## Model Test Score and Prediction
 
@@ -113,15 +158,13 @@ The process followed for creating the model was inspired by @dsci571 and @JMLR:v
 
 # Discussion
 
-The KNN model described in this report is able to predict the income of an individual based on the described categorical features with an accuracy of ~80% as seen in the training and test scores. 
+The KNN model presented in this report predicts an individual's income based on categorical features with an accuracy of approximately 80%, as reflected in both the training and test scores. The selected categorical features, particularly those related to occupation and education level, were expected to have a significant influence on income predictions.
 
-It was expected that selected categorical features would influence the income range for individuals, particularly those related to occupation and education level. 
+W also observed that the model tends to predict a higher proportion of individuals earning less than $50K and fewer individuals earning more than $50K compared to the actual distribution. This suggests that while the model captures some trends, it may have a bias toward predicting lower income levels.
 
-With above histograms, we notice that our KNN model predicts more individuals to have income that is less than 50K and predict less individuals to have more than 50K income, comparint to the actual results.
+These findings highlight the impact of socioeconomic characteristics on income levels, reaffirming that factors such as occupation and education are key indicators.
 
-These findings support the notion that specific socioeconomic characteristics of individuals have a direct influence on the individual's income level.
-
-However, this analysis opens the question on how each individual feature affects the model. Therefore, further deep-dive could better inform if all features have a significant influence on the model's ability to predict accurately. Additional numerical features, such as age and hours-per-week are likely to improve the model training process and could be evaluated as well.
+However, this analysis raises questions about the individual contributions of each feature to the model’s performance. A deeper examination could help determine whether all selected features are equally significant in predicting income. Additionally, incorporating numerical features like age and hours-per-week could further enhance the model's predictive power and should be explored in future evaluations.
 
 # References
 
